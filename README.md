@@ -1,6 +1,50 @@
 
 # Spring AI
 
+## AI - Concepts
+
+```xml 
+Models: 
+------
+AI models are algorithms designed to process and 
+generate information, often mimicking human cognitive functions. 
+By learning patterns and insights from large datasets, 
+these models can make predictions, text, images, 
+or other outputs, enhancing various applications across industries.
+Eg. GPT-4o
+
+
+Prompts: 
+-------
+Prompts serve as the foundation for the language-based inputs that 
+guide an AI model to produce specific outputs. 
+For those familiar with ChatGPT, a prompt might seem like merely 
+the text entered into a dialog box that is sent to the API. 
+However, it encompasses much more than that. 
+In many AI Models, the text for the prompt is not just a simple string.
+
+
+Prompt Templates: 
+----------------
+Creating effective prompts involves establishing the context of the 
+request and substituting parts of the request with values 
+specific to the user’s input.
+For instance, consider the simple prompt template:
+Tell me a {adjective} joke about {content}.
+
+
+Tokens: 
+------
+Tokens serve as the building blocks of how an AI model works. 
+On input, models convert words to tokens. 
+On output, they convert tokens back to words.
+
+
+Reference: 
+https://docs.spring.io/spring-ai/reference/concepts.html
+
+```
+
 ## Setup - OpenAI 
 ```xml 
 OpenAI
@@ -63,6 +107,9 @@ spring:
 Check here for the list of parameters available:
 https://docs.spring.io/spring-ai/reference/api/image/openai-image.html
 
+Current AI provider support by Spring AI: 
+https://docs.spring.io/spring-ai/reference/api/chat/comparison.html
+
 ```
 
 ## OpenAI Image generation (ai-image-generator)
@@ -104,10 +151,16 @@ https://docs.spring.io/spring-ai/reference/api/chatclient.html
 
 ```
 
+
+
+
 ### Reference
 ```xml
 https://dzone.com/articles/spring-ai-generate-images-openai-dalle?edition=958905
 https://docs.spring.io/spring-ai/reference/
 https://docs.spring.io/spring-ai/reference/api/image/openai-image.html
+
+https://www.youtube.com/watch?v=9Crrhz0pm8s
+https://docs.spring.io/spring-ai/reference/concepts.html
 
 ```
