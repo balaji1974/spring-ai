@@ -87,6 +87,23 @@ https://docs.spring.io/spring-ai/reference/
 
 ```
 
+## OpenAI Chatbot (ai-chat-assistant)
+```xml
+
+@RestController() -> This opens up an URL http://localhost:8080/chat/query
+to which you can submit your chating prompt 
+
+Run the service and call the url like this example below: 
+curl --location 'http://localhost:8080/chat/query?userInput=What%20is%20the%20best%20language%20model%20for%20AI%3F%20'
+
+and you will receive a response which can be displayed on the screen 
+
+Full details of this example can be found here:
+https://docs.spring.io/spring-ai/reference/api/chatclient.html
+
+
+```
+
 ### Reference
 ```xml
 https://dzone.com/articles/spring-ai-generate-images-openai-dalle?edition=958905

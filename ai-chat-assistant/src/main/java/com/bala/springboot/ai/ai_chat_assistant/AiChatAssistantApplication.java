@@ -1,13 +1,13 @@
-package com.bala.springboot.ai.ai_image_generator;
+package com.bala.springboot.ai.ai_chat_assistant;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AiImageGeneratorApplication {
+public class AiChatAssistantApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AiImageGeneratorApplication.class, args);
+		SpringApplication.run(AiChatAssistantApplication.class, args);
 	}
-	
+
 }
