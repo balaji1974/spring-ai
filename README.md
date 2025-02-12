@@ -148,10 +148,40 @@ and you will receive a response which can be displayed on the screen
 Full details of this example can be found here:
 https://docs.spring.io/spring-ai/reference/api/chatclient.html
 
+***Note: This sample is just a tip of an iceberg of what chat assistant could do******
 
 ```
 
+## OpenAI Chatbot - Formatting the output (ai-chat-assistant-formatted-output)
+```xml
 
+@RestController() -> This opens up an URL http://localhost:8080/chat/query
+to which you can submit your chating prompt 
+
+
+There is also an overloaded entity method with the signature 
+entity(ParameterizedTypeReference<T> type) that lets you specify types 
+such as generic Lists:
+@GetMapping("/chat/query")
+List<Article> askQuestion(@RequestParam(name = "question") String question) {
+    return chatClient.prompt()
+      .user(question)
+      .call()
+      .entity(new ParameterizedTypeReference<List<Article>>() {});
+}
+
+
+Run the service and call the url like this example below: 
+curl --location 'http://localhost:8080/chat/query?question=Who%20are%20the%20top%2010%20actors%20in%20the%20world%3F'
+curl --location 'http://localhost:8080/chat/query?question=What%20is%20the%20top%205%20language%20model%20for%20AI%3F'
+
+and you will receive a formatted response which can be displayed on the screen 
+
+Full details of this example can be found here:
+https://spring.io/blog/2024/05/09/spring-ai-structured-output
+https://docs.spring.io/spring-ai/reference/api/chatclient.html
+
+```
 
 
 ### Reference
