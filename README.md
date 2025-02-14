@@ -170,6 +170,16 @@ List<Article> askQuestion(@RequestParam(name = "question") String question) {
       .entity(new ParameterizedTypeReference<List<Article>>() {});
 }
 
+Article model consist of the following structure: 
+ public class Article {
+  
+  private String name;
+  private String category;
+  private String fullDescription;
+
+}
+
+Note: This is how my output will be formatted
 
 Run the service and call the url like this example below: 
 curl --location 'http://localhost:8080/chat/query?question=Who%20are%20the%20top%2010%20actors%20in%20the%20world%3F'
@@ -182,6 +192,211 @@ https://spring.io/blog/2024/05/09/spring-ai-structured-output
 https://docs.spring.io/spring-ai/reference/api/chatclient.html
 
 ```
+
+
+## OpenAI Chatbot - Step by Step (ai-prompt-assistant)
+```xml
+
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Spring Web
+OpenAI
+
+2. Create a project 'ai-prompt-assistant' and download
+
+3. The pom.xml will have the following dependencies: 
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.ai</groupId>
+    <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+</dependency>
+
+4. Application properties
+In the application.properties add the following:
+spring.ai.openai.api-key=<your-api-key>
+
+5. The fundametal component of OpenAI chat is ChatModel class.
+Create a @Service class called AskAIChatService and autowire ChatModel
+
+@Autowired
+ChatModel chatModel;
+
+6. Input the prompt to this model and return the response
+public String getResponse(String prompt) {
+    return chatModel.call(prompt);
+}
+
+7. Create a Rest controller called AskAIController 
+and autowire this service
+@Autowired
+AskAIChatService askAIChatService;
+
+8. Add a GetMapping to this controller and pass the request parameter 
+named prompt to the askAIChatService and return the response 
+@GetMapping("ask-ai")
+public String getRespone(@RequestParam String prompt) {
+  return askAIChatService.getResponse(prompt);
+}
+
+9. Start the application and execute the service from a browser 
+or postman or from command line using curl 
+curl --location 'http://localhost:8080/ask-ai?prompt=What%20is%20the%20top%20rated%20AI%20tool%20to%20learn%3F%20and%20format%20the%20output'
+
+```
+
+## OpenAI Chatbot - Customizing the ChatModel (ai-prompt-assistant)
+```xml
+10. Create 2 static final variables in the Service class
+This variables and many others could be customized. 
+Full list could be found in the below link. 
+https://platform.openai.com/docs/api-reference/chat/create
+private static final String MODEL="gpt-4o"; // https://platform.openai.com/docs/models
+private static final Double TEMPRATURE=0.4D; 
+
+
+11. Create a new method called getResponseOptions and 
+customize the chatModel with the final varibale values created. 
+
+public String getResponseOptions(String prompt) {
+  ChatResponse response = chatModel.call(
+        new Prompt(
+            prompt,
+            OpenAiChatOptions.builder()
+                .model(MODEL)
+                .temperature(TEMPRATURE)
+            .build()
+        ));
+  return response.getResult().getOutput().getContent();
+}
+
+12. Add a GetMapping to the controller and pass the request parameter 
+named prompt to the askAIChatService's getResponseOptions method 
+and return the response: 
+
+@GetMapping("ask-ai-options")
+public String getResponeOptions(@RequestParam String prompt) {
+  return askAIChatService.getResponseOptions(prompt);
+}
+
+13. Start the application and execute the service from a browser 
+or postman or from command line using curl 
+curl --location 'http://localhost:8080/ask-ai-options?prompt=What%20is%20the%20best%20programming%20language%20to%20learn%20today%3F'
+
+
+```
+
+
+## OpenAI Chatbot - Formatting the output of the ChatModel (ai-prompt-assistant)
+```xml
+14. Create a record in the Service class that will carry the formatted output
+public record MathReasoning(
+      @JsonProperty(required = true, value = "steps") Steps steps,
+      @JsonProperty(required = true, value = "final_answer") String finalAnswer) {
+
+  record Steps(
+      @JsonProperty(required = true, value = "items") Items[] items) {
+
+    record Items(
+        @JsonProperty(required = true, value = "explanation") String explanation,
+        @JsonProperty(required = true, value = "output") String output) {}
+  }
+}
+
+15. Add method for getting the formatted output:
+public MathReasoning getResponeFormatted() {
+  var outputConverter = new BeanOutputConverter<>(MathReasoning.class);
+
+  var jsonSchema = outputConverter.getJsonSchema();
+
+  Prompt prompt = new Prompt("how can I solve 8x + 7 = -23",
+    OpenAiChatOptions.builder()
+        .model(MODEL)
+        .temperature(TEMPRATURE)
+        .responseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, jsonSchema))
+        .build());
+
+  ChatResponse response = chatModel.call(prompt);
+  String content = response.getResult().getOutput().getContent();
+
+  MathReasoning mathReasoning = outputConverter.convert(content);
+  return mathReasoning;
+}
+
+The responseFormat is set in the new Prompt method chaining and result is 
+converted in the outputConverter
+Check the following links for more information: 
+https://spring.io/blog/2024/08/09/spring-ai-embraces-openais-structured-outputs-enhancing-json-response
+https://docs.spring.io/spring-ai/reference/api/structured-output-converter.html#_bean_output_converter
+
+16. Add a GetMapping to the controller and pass the request parameter 
+named prompt to the askAIChatService's getResponeMath method 
+and return the response: 
+
+@GetMapping(value="ask-ai-math",produces = MediaType.APPLICATION_JSON_VALUE)
+public MathReasoning getResponeMath() {
+  return askAIChatService.getResponeFormatted();
+}
+
+17. Start the application and execute the service from a browser 
+or postman or from command line using curl 
+curl --location 'http://localhost:8080/ask-ai-math'
+
+
+```
+
+## OpenAI Generating Image From Prompt - Step by Step (ai-prompt-assistant)
+```xml
+18. To generate an image from prompt lets create a new service 
+called AskAIImageService 
+
+@Service
+public class AskAIImageService {
+
+}
+
+19. We will inject the OpenAI Image Model into this service 
+by autowiring
+
+@Autowired
+OpenAiImageModel openAiImageModel;
+
+20. Next we will create an image response 
+by setting a few image options like height, width etc. 
+public ImageResponse generateImage(String prompt) {
+  ImageResponse response = openAiImageModel.call(
+          new ImagePrompt(prompt,
+          OpenAiImageOptions.builder()
+                  .quality("hd")
+                  .N(1)
+                  .height(1024)
+                  .width(1024).build())
+
+  );
+  return response;
+}
+
+21. Finally add a controller method in our AskAIController class 
+which will build an url from the image response object 
+and redirect us to this url. 
+
+@GetMapping("ask-ai-image-generate")
+public void generateImage(HttpServletResponse httpServletResponse, @RequestParam String prompt) throws IOException {
+  ImageResponse imageResponse= askAIImageService.generateImage(prompt);
+  String imageURL = imageResponse.getResult().getOutput().getUrl();
+  httpServletResponse.sendRedirect(imageURL);
+}
+
+22. Run this on the browser and add any prompt you need 
+and see the result.
+http://localhost:8080/ask-ai-image-generate?prompt=Harry%20Potter%20in%20India
+
+
+```
+
 
 
 ### Reference
