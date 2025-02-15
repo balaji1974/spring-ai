@@ -1,8 +1,6 @@
 package com.bala.springboot.ai.ai_prompt_assistant.controller;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.ai.image.ImageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bala.springboot.ai.ai_prompt_assistant.service.AskAIChatService;
 import com.bala.springboot.ai.ai_prompt_assistant.service.AskAIChatService.MathReasoning;
 import com.bala.springboot.ai.ai_prompt_assistant.service.AskAIImageService;
+import com.bala.springboot.ai.ai_prompt_assistant.service.AskAIRecipeService;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -25,6 +24,9 @@ public class AskAIController {
 	
 	@Autowired
 	AskAIImageService askAIImageService;
+	
+	@Autowired
+	AskAIRecipeService askAIIRecipeService;
 	
 	@GetMapping("ask-ai")
 	public String getRespone(@RequestParam String prompt) {
@@ -55,6 +57,13 @@ public class AskAIController {
 		
 		*/
 		httpServletResponse.sendRedirect(imageURL);
+	}
+	
+	@GetMapping("ask-ai-recipe-creator")
+	public String getResponeRecipe(@RequestParam String ingredients, 
+			@RequestParam(defaultValue = "any") String cuisine, 
+			@RequestParam(defaultValue = "") String dietaryRestrictions) {
+		return askAIIRecipeService.createRecipe(ingredients, cuisine, dietaryRestrictions);
 	}
 	
 }

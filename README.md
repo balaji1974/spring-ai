@@ -40,8 +40,48 @@ On input, models convert words to tokens.
 On output, they convert tokens back to words.
 
 
+Building blocks for LLM:
+-----------------------
+Retrieval (Query Result)
+Tool (Call response)
+Memory (Read / Write)
+
+
+LLM Workflows: 
+--------------
+
+Prompt Chaining:
+It decomposes tasks into sequence of steps where each call 
+processes the output of the previous one. We can add programatic 
+check (gate) on any intermediate steps to ensure that the process 
+is still on track. 
+
+Routing: 
+Routing classifies the input and directs it to a specialized 
+followup task. This workflow allows for speration of concerns 
+and building more specialized prompts. Without this workflow 
+optimizing on one kind of input can hurt performance of other
+inputs. 
+
+Parallelization:
+LLM can sometime work simulataneously on task and have their 
+output aggregated programmatically.
+Two parts of parallelization are: 
+Sectioning: Break task into independent subtask and run it in parallel
+Voting: Running the same task multiple times to get diverse output
+
+Orchestator Worker: 
+A central LLM dynamically breaks down tasks, delegates them to 
+worker LLMs and synthesizes their results 
+
+Evaluator Optimizer:
+One LLM call generates a respone, while another provides evaluation
+and feeback in a loop.
+
+
 Reference: 
 https://docs.spring.io/spring-ai/reference/concepts.html
+https://www.youtube.com/watch?v=tx5OapbK-8A
 
 ```
 
@@ -371,7 +411,7 @@ public ImageResponse generateImage(String prompt) {
           new ImagePrompt(prompt,
           OpenAiImageOptions.builder()
                   .quality("hd")
-                  .N(1)
+                  .N(1) // default is dall-e-3 model which support max 1 image generation per request
                   .height(1024)
                   .width(1024).build())
 
@@ -387,6 +427,16 @@ and redirect us to this url.
 public void generateImage(HttpServletResponse httpServletResponse, @RequestParam String prompt) throws IOException {
   ImageResponse imageResponse= askAIImageService.generateImage(prompt);
   String imageURL = imageResponse.getResult().getOutput().getUrl();
+
+  // Use this in case you need multiple images from the response 
+  // Supported in dall-e-2
+  /*
+  List<String> imageURLs=imageResponse.getResults().stream()
+      .map(result-> result.getOutput().getUrl())
+      .toList();
+  
+  */
+
   httpServletResponse.sendRedirect(imageURL);
 }
 
@@ -394,10 +444,56 @@ public void generateImage(HttpServletResponse httpServletResponse, @RequestParam
 and see the result.
 http://localhost:8080/ask-ai-image-generate?prompt=Harry%20Potter%20in%20India
 
-
 ```
 
 
+## OpenAI - Generating Results from Template - Step by Step (ai-prompt-assistant)
+```xml
+23. Lets create a template for recipie with ingredients, cuisine and dietary restriction choices
+Create a service (AskAIRecipeService) and autowire the ChatModel 
+
+24. Create a template 
+var template ="""
+    I want to create a recipie using the following ingredients: {ingredients}.
+    The cuisine type I prefer is: {cuisine}.
+    Please consider the following dietaryRestrictions: {dietaryRestrictions}.
+    Please provide me a detail recipe including title, list of ingredients, and cooking instructions
+  """;
+
+25. Create a PromptTempalate object and inject the template and params into it. 
+PromptTemplate promptTemplate=new PromptTemplate(template);
+Map<String, Object> params=Map.of(
+    "ingredients", ingredients,
+    "cuisine", cuisine,
+    "dietaryRestrictions", dietaryRestrictions
+    );
+
+26. Finally create a prompt and chat model out of it. 
+Prompt prompt=promptTemplate.create(params);
+return chatModel.call(prompt).getResult().getOutput().getContent();
+ 
+
+19. We will inject the OpenAI Chat Model into the controller service 
+by autowiring
+@Autowired
+AskAIRecipeService askAIIRecipeService;
+
+27. Add a GetMapping to the controller and pass the request parameter 
+named ingredients, cuisine and dietaryRestrictions  to the askAIIRecipeService's 
+getResponeRecipe method and return the response: 
+
+@GetMapping("ask-ai-recipe-creator")
+public String getResponeRecipe(@RequestParam String ingredients, 
+    @RequestParam(defaultValue = "any") String cuisine, 
+    @RequestParam(defaultValue = "") String dietaryRestrictions) {
+  return askAIIRecipeService.createRecipe(ingredients, cuisine, dietaryRestrictions);
+}
+
+28. Start the application and execute the service from 
+postman or from command line using curl 
+curl --location 'http://localhost:8080/ask-ai-recipe-creator?ingredients=chicken%2C%20curry%20masala%2C%20olives%2C%20onion%2C%20tomatoes&cuisine=Indian'
+
+```
 
 ### Reference
 ```xml
@@ -407,5 +503,7 @@ https://docs.spring.io/spring-ai/reference/api/image/openai-image.html
 
 https://www.youtube.com/watch?v=9Crrhz0pm8s
 https://docs.spring.io/spring-ai/reference/concepts.html
+
+https://www.youtube.com/watch?v=tx5OapbK-8A
 
 ```
