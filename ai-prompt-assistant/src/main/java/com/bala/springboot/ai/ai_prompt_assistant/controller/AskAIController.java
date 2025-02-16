@@ -1,6 +1,7 @@
 package com.bala.springboot.ai.ai_prompt_assistant.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.ai.image.ImageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +15,10 @@ import com.bala.springboot.ai.ai_prompt_assistant.service.AskAIChatService.MathR
 import com.bala.springboot.ai.ai_prompt_assistant.service.AskAIImageService;
 import com.bala.springboot.ai.ai_prompt_assistant.service.AskAIRecipeService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@RestController 
+@RestController
 public class AskAIController {
 	
 	@Autowired
@@ -44,19 +46,20 @@ public class AskAIController {
 	}
 	
 	@GetMapping("ask-ai-image-generate")
-	public void generateImage(HttpServletResponse httpServletResponse, @RequestParam String prompt) throws IOException {
+	public List<String> generateImage(HttpServletResponse httpServletResponse, HttpServletRequest httpServletRequest, @RequestParam String prompt) throws IOException {
 		ImageResponse imageResponse= askAIImageService.generateImage(prompt);
-		String imageURL = imageResponse.getResult().getOutput().getUrl();
+		//String imageURL = imageResponse.getResult().getOutput().getUrl();
 		
 		// Use this in case you need multiple images from the response 
 		// Supported in dall-e-2
-		/*
+		
 		List<String> imageURLs=imageResponse.getResults().stream()
 				.map(result-> result.getOutput().getUrl())
 				.toList();
 		
-		*/
-		httpServletResponse.sendRedirect(imageURL);
+		return imageURLs;
+		
+		//httpServletResponse.sendRedirect(imageURL);
 	}
 	
 	@GetMapping("ask-ai-recipe-creator")

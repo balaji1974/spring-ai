@@ -9,5 +9,5 @@ public class AiPromptAssistantApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AiPromptAssistantApplication.class, args);
 	}
-
+	
 }
