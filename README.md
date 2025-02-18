@@ -495,6 +495,61 @@ curl --location 'http://localhost:8080/ask-ai-recipe-creator?ingredients=chicken
 
 ```
 
+## OpenAI - Audio Transcription model - Step by Step (ai-audio-transcribe)
+```xml
+1. Add the Spring AI dependency. 
+
+2. In the application.properties file add the following: 
+spring.ai.openai.api-key=<your api key>
+spring.ai.openai.audio.transcription.base-url=https://api.openai.com
+spring.ai.openai.audio.transcription.options.model=whisper-1
+spring.ai.openai.audio.transcription.options.response-format=json
+
+3. Create a controller 'TranscriptionController' and inject the following:
+private final OpenAiAudioTranscriptionModel transcriptionModel;
+
+public TranscriptionController(@Value("${spring.ai.openai.api-key}") String apiKey) {
+    OpenAiAudioApi openAiAudioApi = new OpenAiAudioApi(apiKey);
+    this.transcriptionModel
+            = new OpenAiAudioTranscriptionModel(openAiAudioApi);
+}
+
+4. Create a ResponseEntity as follows:
+
+@CrossOrigin(origins = "http://localhost:5173", maxAge = 3600)
+@PostMapping("ai-audio-transcriptor")
+public ResponseEntity<String> transcribeAudio(
+        @RequestParam("file") MultipartFile file) throws IOException {
+    File tempFile = File.createTempFile("audio",".wav");
+    file.transferTo(tempFile);
+
+    
+    OpenAiAudioTranscriptionOptions transcriptionOptions = OpenAiAudioTranscriptionOptions.builder()
+            .responseFormat(OpenAiAudioApi.TranscriptResponseFormat.TEXT)
+            .language("en")
+            .temperature(0f)
+            .build();
+
+    FileSystemResource audioFile = new FileSystemResource(tempFile);
+
+    AudioTranscriptionPrompt transcriptionRequest = new AudioTranscriptionPrompt(audioFile, transcriptionOptions);
+    AudioTranscriptionResponse response = transcriptionModel.call(transcriptionRequest);
+
+    tempFile.delete();
+    return new ResponseEntity<>(response.getResult().getOutput(), HttpStatus.OK);
+}
+
+5. Run the application. 
+
+6. Run the following from command line or postman:
+curl --location 'http://localhost:8080/ai-audio-transcriptor?file=null' \
+--form 'file=@"/<your-file-location>/hello.mp3"'
+
+Note: I created the hello.mp3 from the following website: https://ttsmp3.com/
+
+```
+
+
 ### Reference
 ```xml
 https://dzone.com/articles/spring-ai-generate-images-openai-dalle?edition=958905
