@@ -549,6 +549,47 @@ Note: I created the hello.mp3 from the following website: https://ttsmp3.com/
 
 ```
 
+## OpenAI RAG - Retrieval Augmented Generation (ai-rag-textreader)
+```xml
+# Vector Database: 
+A vector database is a collection of data stored as mathematical representations. 
+Vector databases make it easier for machine learning models to remember previous inputs, 
+allowing machine learning to be used to power search, recommendations, 
+and text generation use-cases. Data can be identified based on similarity metrics instead 
+of exact matches, making it possible for a computer model to understand data contextually.
+
+1. Add the Spring AI dependency. 
+
+2. In the application.properties file add the following: 
+spring.ai.openai.api-key=<your api key>
+
+3. To generate an RAG response from prompt lets create a new service 
+called RagConfiguration 
+
+@Configuration
+public class RagConfiguration {
+
+}
+
+4. Creat a method called simpleVectorStore which will 
+read a text file from a path containing the faq and convert 
+it back to a vector file. If the file already exist, then it 
+will not create the vector file again. 
+
+
+5. Create a controller 'RagController' which will read the 
+message from the user and also read the Vector file, stuff everything 
+into a template, and create a Prompt before sending it to OpenAI 
+to get the output against the Vector content provided 
+
+
+6. Run the application. 
+
+7. Run the following from command line or postman:
+curl --location 'http://localhost:8080/faq?message=how%20many%20sports%20%20does%20Olympics%20have'
+
+
+```
 
 ### Reference
 ```xml
@@ -560,5 +601,8 @@ https://www.youtube.com/watch?v=9Crrhz0pm8s
 https://docs.spring.io/spring-ai/reference/concepts.html
 
 https://www.youtube.com/watch?v=tx5OapbK-8A
+https://www.youtube.com/watch?v=4-rG2qsTrAs
+
+https://www.cloudflare.com/learning/ai/what-is-vector-database/
 
 ```
