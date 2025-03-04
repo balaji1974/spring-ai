@@ -122,7 +122,7 @@ OpenAI
 4. Application properties
 -------------------------
 In the application.properties add the following:
-spring.ai.openai.api-key=<your-api-key>
+spring.ai.openai.api-key=${OPEN_API_KEY}
 spring.image.options.model=dall-e-3
 spring.image.options.size=1024x1024
 spring.image.options.style=vivid
@@ -257,7 +257,7 @@ OpenAI
 
 4. Application properties
 In the application.properties add the following:
-spring.ai.openai.api-key=<your-api-key>
+spring.ai.openai.api-key=${OPEN_API_KEY}
 
 5. The fundametal component of OpenAI chat is ChatModel class.
 Create a @Service class called AskAIChatService and autowire ChatModel
