@@ -42,6 +42,12 @@ public class RagConfiguration {
     */
 	@Bean
     public VectorStore simpleVectorStore(EmbeddingModel embeddingModel) throws IOException {
+		
+		/*
+		 * SimpleVectorStore is a simple implementation of the VectorStore interface. 
+		 * It also provides methods to save the current state of the vectors 
+		 * to a file, and to load vectors from a file.
+		 */
     	SimpleVectorStore simpleVectorStore = SimpleVectorStore
     		      .builder(embeddingModel)
     		      .build();
