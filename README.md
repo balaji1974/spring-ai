@@ -558,7 +558,7 @@ allowing machine learning to be used to power search, recommendations,
 and text generation use-cases. Data can be identified based on similarity metrics instead 
 of exact matches, making it possible for a computer model to understand data contextually.
 
-1. Add the Spring AI dependency. 
+1. Add the Spring OpenAI dependency. 
 
 2. In the application.properties file add the following: 
 spring.ai.openai.api-key=<your api key>
@@ -591,6 +591,83 @@ curl --location 'http://localhost:8080/faq?message=how%20many%20sports%20%20does
 
 ```
 
+
+## Running a Machine Learning model locally - Ollama
+```xml 
+
+1. Download ollama and install it according to your OS version
+https://ollama.com/download
+
+Once installed run the following commands to check: 
+ollama --version
+ollama ls => This command will list all the models that are currently installed locally 
+
+Supported models and the command to install them are given in the below link:
+https://github.com/ollama/ollama
+Example command to download and install one of the models is:
+ollama run llama3.3
+
+2. Run Olloma from the PC after installation (installed under applications in MAC)
+Check at http://localhost:11434/ if it is running fine
+
+3. Create a spring project with following dependencies: 
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
+</dependency>
+
+4. Add one more dependency 
+PDF Document reader and implementation of Apache PDFBox® - A Java PDF Library
+The Apache PDFBox® library is an open source Java tool for working 
+with PDF documents. This project allows creation of new PDF documents, 
+manipulation of existing documents and the ability to 
+extract content from documents.
+
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-pdf-document-reader</artifactId>
+</dependency>
+
+5. Add the following in application.properties file:
+
+spring.ai.ollama.chat.options.model=llama3.2:latest
+spring.ai.ollama.embedding.enabled=true
+spring.ai.ollama.embedding.options.model=llama3.2:latest
+
+file.path=classpath:data/sample.pdf
+
+The file path is where the sample pdf file resides which will be read and 
+convered into an in memory vector database 
+
+
+6. Create 2 model files for request and response: 
+ChatResponse.java
+QueryRequest.java
+
+7. Create a configuration file called VectorBuilder.java 
+This file will read the PDF file in the <classpath>/data folder and 
+will convert the content to be stored in a VectorStore (database)
+
+8. Finally create a PDFController file which will inject the 
+VectorStore and ChatClient
+Use the VectorStore to find a similarity search and convert 
+the respone into the ChatResponse object before returning it 
+
+9. Run the application. 
+
+10. Run the following from command line or postman:
+curl --location 'http://localhost:8080/chat' \
+--header 'Content-Type: application/json' \
+--data '{
+    "query": "Who has the highest salary?"
+}'
+
+```
+
 ### Reference
 ```xml
 https://dzone.com/articles/spring-ai-generate-images-openai-dalle?edition=958905
@@ -602,6 +679,7 @@ https://docs.spring.io/spring-ai/reference/concepts.html
 
 https://www.youtube.com/watch?v=tx5OapbK-8A
 https://www.youtube.com/watch?v=4-rG2qsTrAs
+https://www.youtube.com/watch?v=-KrqLaJ0uaQ
 
 https://www.cloudflare.com/learning/ai/what-is-vector-database/
 
