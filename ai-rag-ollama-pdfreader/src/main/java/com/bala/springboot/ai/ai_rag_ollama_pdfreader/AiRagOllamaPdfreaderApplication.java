@@ -1,4 +1,4 @@
-package com.bala.springbook.ai.ai_rag_ollama_pdfreader;
+package com.bala.springboot.ai.ai_rag_ollama_pdfreader;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

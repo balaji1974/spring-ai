@@ -1,4 +1,4 @@
-package com.bala.springbook.ai.ai_rag_ollama_pdfreader.model;
+package com.bala.springboot.ai.ai_rag_ollama_pdfreader.model;
 
 public class ChatResponse {
 

@@ -592,7 +592,7 @@ curl --location 'http://localhost:8080/faq?message=how%20many%20sports%20%20does
 ```
 
 
-## Running a Machine Learning model locally - Ollama
+## Running a Machine Learning model locally - Ollama (ai-rag-ollama-pdfreader)
 ```xml 
 
 1. Download ollama and install it according to your OS version
@@ -668,11 +668,166 @@ curl --location 'http://localhost:8080/chat' \
 
 ```
 
+## OpenAI RAG - Vector Database (PGVector) (ai-rag-pgvector)
+```xml 
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Spring Web
+Spring JDBC
+OpenAI
+PGVector
+Lombok
+DevTools and
+Docker Compose
+PDF Document Reader
+
+
+2. Create a project 'ai-rag-pgvector' and download
+
+3. The pom.xml will have the following dependencies: 
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-data-jdbc</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-openai</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-vector-store-pgvector</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-pdf-document-reader</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-devtools</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-docker-compose</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-spring-boot-docker-compose</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+<dependency>
+  <groupId>org.projectlombok</groupId>
+  <artifactId>lombok</artifactId>
+  <optional>true</optional>
+</dependency>
+
+
+4. Their is a docker compose.yaml file.
+Modifiy it as below to add pgadmin, adding db user and password
+
+services:
+  pgvector:
+    image: 'pgvector/pgvector:pg16'
+    environment:
+      - 'POSTGRES_DB=chat-engine-db'
+      - 'POSTGRES_PASSWORD=secret'
+      - 'POSTGRES_USER=chat-engine-user'
+    labels:
+      - "org.springframework.boot.service-connection=postgres"
+    ports:
+      - '5432:5432'
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword
+    ports:
+      - "8081:80"
+    depends_on:
+      - pgvector 
+
+5. Go to command promt and run 
+docker compose up 
+
+All the depenedencies for pgvector and pgadmin gets pulled 
+and the container starts running
+
+6. Verify the postgres admin panel  
+http://localhost:8081/browser/
+Enter User ID: admin@example.com
+Enter Password: adminpassword
+
+7. Add a new server in the admin browser 
+Add new server -> General tab 
+Name: localhost
+
+Connection tab 
+Host name / address: pgvector
+User Name: chat-engine-user
+Password: secret
+
+Save and check if the server is added & connected 
+
+8. Using Spring ETL pipeline for Extracting, Transforming and Loading PDF document
+https://docs.spring.io/spring-ai/reference/1.0/api/etl-pipeline.html
+
+The VectorBuilder.java inside the config folder reads data from the resources/static 
+folder, in our case NVIDIAAn.pdf file. Note: mulitple PDF files can be placed in this 
+folder and it will all be extracted pagewise, content split and stored in the 
+pgvector database.
+
+9. Add configuration in applications.properties file
+# needed for open ai access
+spring.ai.openai.api-key=${OPEN_AI_KEY}
+# needed for creating the schema automatically in pgvector store 
+spring.ai.vectorstore.pgvector.initialize-schema=true
+# the storage location of the pdf content file that needs to be read 
+documents.directory.path=classpath:static
+
+10. Add a controller file that accepts a message, 
+finds the similarity search using the vector database, 
+and sends fetched document and the message to the ChatGPT engine 
+to return the response. 
+
+Note: the below code uses an in-memory chat advisor to store the state of the previous queries
+
+Check the below part in the constructor: 
+chatClientBuilder
+  .defaultAdvisors(new MessageChatMemoryAdvisor(new InMemoryChatMemory()))
+  .build();
+
+And the ChatMessage method for details 
+in the ChatController.java file. 
+
+11. Run the application 
+Run the application and excute a curl command to see the respone:
+curl --location 'http://localhost:8080/chat' \
+--header 'Content-Type: application/json' \
+--data '{
+    "chatId": "2216b193-d85f-4f86-b8cb-26a22bf05652",
+    "message": "Give me its revenue growth?"
+}'
+
+If no chatId parameter is sent, the program generates a random UUID 
+
+```
+
+
 ### Reference
 ```xml
 https://dzone.com/articles/spring-ai-generate-images-openai-dalle?edition=958905
 https://docs.spring.io/spring-ai/reference/
 https://docs.spring.io/spring-ai/reference/api/image/openai-image.html
+https://docs.spring.io/spring-ai/reference/1.0/api/etl-pipeline.html
 
 https://www.youtube.com/watch?v=9Crrhz0pm8s
 https://docs.spring.io/spring-ai/reference/concepts.html

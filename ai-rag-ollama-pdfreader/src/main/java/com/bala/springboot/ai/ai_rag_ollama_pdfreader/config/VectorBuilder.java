@@ -1,4 +1,4 @@
-package com.bala.springbook.ai.ai_rag_ollama_pdfreader.config;
+package com.bala.springboot.ai.ai_rag_ollama_pdfreader.config;
 
 import java.io.IOException;
 import java.util.List;

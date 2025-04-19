@@ -1,4 +1,4 @@
-package com.bala.springbook.ai.ai_rag_ollama_pdfreader.controller;
+package com.bala.springboot.ai.ai_rag_ollama_pdfreader.controller;
 
 import java.util.List;
 import java.util.Map;
@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bala.springbook.ai.ai_rag_ollama_pdfreader.model.ChatResponse;
-import com.bala.springbook.ai.ai_rag_ollama_pdfreader.model.QueryRequest;
+import com.bala.springboot.ai.ai_rag_ollama_pdfreader.model.ChatResponse;
+import com.bala.springboot.ai.ai_rag_ollama_pdfreader.model.QueryRequest;
 
 
 
