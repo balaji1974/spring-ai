@@ -821,6 +821,119 @@ If no chatId parameter is sent, the program generates a random UUID
 
 ```
 
+## Vector Database - Similarity Search (ai-vector-db)
+```xml 
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Spring Web
+Spring JDBC
+OpenAI
+PGVector
+DevTools and
+Docker Compose
+
+
+2. Create a project 'ai-vector-db' and download
+
+3. The pom.xml will have the following dependencies: 
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-jdbc</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-openai</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-vector-store-pgvector</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-devtools</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-docker-compose</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-spring-boot-docker-compose</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+
+
+4. Their is a docker compose.yaml file.
+Modifiy it to set db user, password and exposed port, in our case 5432
+services:
+  pgvector:
+    image: 'pgvector/pgvector:pg16'
+    environment:
+      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_PASSWORD=secret'
+      - 'POSTGRES_USER=myuser'
+    labels:
+      - "org.springframework.boot.service-connection=postgres"
+    ports:
+      - '5432:5432'
+
+5. Go to command promt and run 
+docker compose up 
+
+All the depenedencies for pgvector gets pulled 
+and the container starts running
+
+6. Import the sql dump data that is needed for this project
+into the our database  
+docker exec -i <our running container name> psql -U myuser -d mydatabase < <path to our sql file>/titanic.sql
+
+7. Login to our database and check if passenger table is created and check the record count.
+Check and verify if 1309 records are imported. 
+
+7. Read the data from 
+https://docs.spring.io/spring-ai/reference/1.0/api/etl-pipeline.html
+
+The VectorBuilder.java inside the config folder reads data from the our imported table 
+(only once if created) and imports the data into the vector_store table. 
+
+9. Add configuration in applications.properties file
+# To start the docker container for pgvector only once
+spring.docker.compose.lifecycle-management=start_only
+# needed for open ai access
+spring.ai.openai.api-key=${OPEN_AI_KEY}
+# needed for creating the schema automatically in pgvector store 
+spring.ai.vectorstore.pgvector.initialize-schema=true
+
+
+10. Modify the prompt and run the application
+In the VectorBuilder.java we have a variable called 
+PROMPT_STRING which can be modified to fetch query results. 
+
+Note: to query we can get the passenger name, 
+if the passenger died or alive, 
+the passenger final destination city, country 
+and if the passenger is male or female. 
+
+I have inserted only these 4 parameters from our original passenger table
+into the vector database but please note that the possibilies are limitless
+
+```
+
+
+
+
+
 
 ### Reference
 ```xml
