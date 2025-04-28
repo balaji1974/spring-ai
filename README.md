@@ -1012,11 +1012,128 @@ This will result in a response containing the SQL query like below:
 Verify it with the netflix.sql file to check the correctness 
 (this could be inserted into a live database and checked for results)
 
+The command to do this would be:
+docker pull postgres
+docker run --name ai-text2sql -e POSTGRES_PASSWORD=secret -e POSTGRES_USER=myuser -e POSTGRES_DB=mydatabase -p 5432:5432 -d postgres   
+docker exec -i <our running container name> psql -U myuser -d mydatabase < <path to our sql file>/netflix.sql
+
+```
+
+## Text To SQL - Dynamic DDL (ai-text2sql-dynamic)
+### (we have it stored in a file schema.sql which is fed to AI engine)
+```xml 
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Spring Web
+Spring JDBC
+OpenAI
+DevTools and
+Postgres
+
+2. Create a project 'ai-text2sql-dynamic' and download
+
+3. The pom.xml will have the following dependencies: 
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-jdbc</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-openai</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-devtools</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+<dependency>
+  <groupId>org.postgresql</groupId>
+  <artifactId>postgresql</artifactId>
+  <scope>runtime</scope>
+</dependency>
+
+4. Install postgres using docker image and start the container. 
+docker pull postgres
+docker run --name ai-text2sql-dynamic -e POSTGRES_PASSWORD=secret -e POSTGRES_USER=myuser -e POSTGRES_DB=mydatabase -p 5432:5432 -d postgres
+
+5. The schema and data are stored in 
+schema.sql
+data.sql
+
+6. Add configuration in applications.properties file
+# needed for open ai access
+spring.ai.openai.api-key=${OPEN_AI_KEY}
+# this ensures that schema and data files are read and created while running the application
+spring.sql.init.mode=always
+# below 3 lines are database connection parameters
+spring.datasource.url=jdbc:postgresql://localhost:5432/mydatabase
+spring.datasource.username=myuser
+spring.datasource.password=secret
+
+7. Run the program once to make sure that schema and data are created in the database
+
+8. The below 3 files are used to warp Exceptions, Request, Response and a Custom Exception Handler. 
+AiException.java
+AiRequest.java
+AiResponse.java
+CustomExceptionHandler.java
+
+9. Add a controller file that accepts a message, 
+wraps a the incoming query with the user prompt template stored in sql-prompt-template.st file,
+which also contains has the DDL attached with it based on which AI must return SQL response  
+and sends it to the ChatGPT engine to return the response. 
+
+Check the below part in the SqlController.java controller file 
+Check the sql method for details. 
+
+10. Run the application 
+Run the application and excute a curl command to see the respone:
+curl --location 'http://localhost:8080/sql' \
+--header 'Content-Type: application/json' \
+--data '{
+    "text": "Find the account with maximum balance."
+}'
+
+This will result in a response containing the SQL query and its response like below:
+{
+    "sqlQuery": "select * from TBL_ACCOUNT where balance = (select max(balance) from TBL_ACCOUNT);",
+    "results": [
+        {
+            "id": 6,
+            "accountnumber": "ACC006",
+            "user_id": 4,
+            "balance": 3000.00,
+            "opendate": "2024-07-09"
+        }
+    ]
+}
+
+Verify it with the database to check the correctness 
 
 ```
 
 
 
+
+
+
+
+
+<dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-jdbc</artifactId>
+      </dependency>
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <scope>runtime</scope>
+      </dependency>
 
 
 
