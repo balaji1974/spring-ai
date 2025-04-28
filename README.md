@@ -931,6 +931,91 @@ into the vector database but please note that the possibilies are limitless
 ```
 
 
+## Text to SQL - Static DDL  (ai-text2sql)
+```xml
+
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Spring Web
+OpenAI
+DevTools
+Note: No database required here, as we give a static DDL statement to AI 
+which generates a query based on this. 
+
+2. Create a project 'ai-text2sql' and download
+
+3. The pom.xml will have the following dependencies: 
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-openai</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-devtools</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+
+
+4. Add configuration in applications.properties file
+# needed for open ai access
+spring.ai.openai.api-key=${OPEN_AI_KEY}
+# set logging level for spring ai to debug  
+logging.level.org.springframework.ai=debug
+
+5. Create Ruquest and Response objects
+Create 2 record objects 
+TextToSQLRequest and 
+TextToSQLResponse
+to warp up the request and response object 
+
+6. Add a controller file that accepts a message, 
+wraps a the incoming query with the user prompt template,
+which also contains the DDL based on which AI must return SQL response  
+and sends it to the ChatGPT engine to return the response. 
+
+Check the below part in the TextToSqlController.java controller file: 
+private static final String USER_PROMPT_TEMPLATE = """
+      You are a Postgres expert. Please generate SQL statements to answer user's query. 
+      
+      The table name is netflix_shows. Column names and data types are shown as below: 
+      show_id, text; type, text; title, text; director, text; cast_members, text; country, text; 
+      date_added, date; release_year, int4; rating, text; duration, text; 
+      listed_in, text; description, text.
+      
+      Output the SQL only. Don't use Markdown format and output the query in a single line.
+      
+      {user_input}
+      """;
+This is where we send DDL and the user_input to ChatGPT model that then generates the SQL.  
+
+Check the textToSql method for details in the TextToSqlController.java file. 
+
+11. Run the application 
+Run the application and excute a curl command to see the respone:
+curl --location 'http://localhost:8080/texttosql' \
+--header 'Content-Type: application/json' \
+--data '{
+    "input": "How many shows were produced in 2020?"
+}'
+
+This will result in a response containing the SQL query like below:
+{
+    "sql": "SELECT COUNT(*) FROM netflix_shows WHERE release_year = 2020;"
+}
+
+Verify it with the netflix.sql file to check the correctness 
+(this could be inserted into a live database and checked for results)
+
+
+```
+
+
 
 
 
