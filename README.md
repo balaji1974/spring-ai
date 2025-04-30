@@ -1118,22 +1118,103 @@ Verify it with the database to check the correctness
 
 ```
 
+## Inject Custom Functions - (ai-inject-custom-function)
+```xml 
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Spring Web
+OpenAI
+DevTools 
 
+2. Create a project 'ai-inject-custom-function' and download
 
-
-
-
-
+3. The pom.xml will have the following dependencies: 
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-openai</artifactId>
+</dependency>
 
 <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-jdbc</artifactId>
-      </dependency>
-    <dependency>
-        <groupId>org.postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-        <scope>runtime</scope>
-      </dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-devtools</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+
+
+4. Add configuration in applications.properties file
+# needed for open ai access
+spring.ai.openai.api-key=${OPEN_AI_KEY}
+
+5. Run the application once to make sure that it starts without errors by 
+injecting your OPEN_AI_KEY 
+
+6. Create 2 service classes and their associated util classes 
+WeatherService.java 
+RectangularAreaService.java
+These 2 classes hold the business logic needed for the application
+
+The following util classes are used for carrying the request and 
+response objects to the service layers: 
+Request.java
+Response.java
+WeatherRequest.java
+WeatherResponse.java
+
+7. Add the following Configuration files: 
+CustomFunctions.java
+WeatherTools.java
+
+The purpose of these files are: 
+Instead of specifying tools programmatically, you can define tools as Spring beans 
+and let Spring AI resolve them dynamically at runtime using the 
+ToolCallbackResolver interface (via the SpringBeanToolCallbackResolver implementation). 
+This option gives you the possibility to use any Function, Supplier, Consumer, 
+or BiFunction bean as a tool. 
+
+
+8. The Controller has 3 different ways of calling a custom functions:
+areaOfRectangle -> This is used to directly call the function along with prompt 
+which is deprecated and not be used in future. 
+getTemperature -> This is used to register a tool call back that can be used 
+to create a ChatClient
+getTemperatureWithTools -> This is used to directly register a tool amd use it 
+within our application
+
+All 3 methods are used in different ways to register a function and call it,
+within the boundaries of AI models. 
+
+
+9. Run the application - 3 differnt ways:
+Way 1: 
+curl --location 'http://localhost:8080/area-rectangle?
+message=%22What%20is%20the%20area%20of%20rectangle%20with%20height%2020%20and%20base%203%22' \
+--data ''
+
+Way 2: 
+curl --location 'http://localhost:8080/weather' \
+--header 'Content-Type: application/json' \
+--data '{
+    "question": "What'\''s the weather like in Abu Dhabi?"
+}'
+
+
+Way 3:
+curl --location 'http://localhost:8080/weather-tools' \
+--header 'Content-Type: application/json' \
+--data '{
+    "question": "What'\''s the weather like in Abu Dhabi?"
+}'
+
+```
+
+
+
 
 
 
@@ -1152,5 +1233,8 @@ https://www.youtube.com/watch?v=4-rG2qsTrAs
 https://www.youtube.com/watch?v=-KrqLaJ0uaQ
 
 https://www.cloudflare.com/learning/ai/what-is-vector-database/
+
+https://docs.spring.io/spring-ai/reference/1.0/api/tools.html
+https://www.devturtleblog.com/sring-ai-function-calling-tutorial/
 
 ```
