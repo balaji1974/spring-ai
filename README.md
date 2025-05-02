@@ -1058,6 +1058,7 @@ Postgres
   <scope>runtime</scope>
 </dependency>
 
+
 4. Install postgres using docker image and start the container. 
 docker pull postgres
 docker run --name ai-text2sql-dynamic -e POSTGRES_PASSWORD=secret -e POSTGRES_USER=myuser -e POSTGRES_DB=mydatabase -p 5432:5432 -d postgres
@@ -1090,9 +1091,17 @@ which also contains has the DDL attached with it based on which AI must return S
 and sends it to the ChatGPT engine to return the response. 
 
 Check the below part in the SqlController.java controller file 
-Check the sql method for details. 
+Check the two methods, sql & sql-dynamic method for details. 
 
-10. Run the application 
+In the sql method we read a static ddl that is stored in the classpath 
+which we feed into the AI engine.
+
+In the sql-dynamic method we build our own ddl based on database and table
+metadata, then convert into into a json format which we feed into the AI engine.
+
+10. Run the application in 2 diffent way based on static & dynamic metadata fetching
+From static DDL statements: 
+---------------------------
 Run the application and excute a curl command to see the respone:
 curl --location 'http://localhost:8080/sql' \
 --header 'Content-Type: application/json' \
@@ -1113,7 +1122,30 @@ This will result in a response containing the SQL query and its response like be
         }
     ]
 }
+Verify it with the database to check the correctness 
 
+From dynamic DDL statements: 
+---------------------------
+Run the application and excute a curl command to see the respone:
+curl --location 'http://localhost:8080/sql-dynamic' \
+--header 'Content-Type: application/json' \
+--data '{
+    "text": "Find the account with maximum balance."
+}'
+
+This will result in a response containing the SQL query and its response like below:
+{
+    "sqlQuery": "select * from TBL_ACCOUNT where balance = (select max(balance) from TBL_ACCOUNT);",
+    "results": [
+        {
+            "id": 6,
+            "accountnumber": "ACC006",
+            "user_id": 4,
+            "balance": 3000.00,
+            "opendate": "2024-07-09"
+        }
+    ]
+}
 Verify it with the database to check the correctness 
 
 ```
