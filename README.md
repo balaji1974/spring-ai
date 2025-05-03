@@ -1245,9 +1245,138 @@ curl --location 'http://localhost:8080/weather-tools' \
 
 ```
 
+## Chat Memory (a session managment alternative for AI models) - (ai-chat-memory)
+```xml 
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Spring Web
+OpenAI
+DevTools 
+Spring Data JPA
+Postgres
 
 
+2. Create a project 'ai-chat-memory' and download
 
+3. The pom.xml will have the following dependencies: 
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-openai</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-devtools</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+<dependency>
+  <groupId>org.postgresql</groupId>
+  <artifactId>postgresql</artifactId>
+  <scope>runtime</scope>
+</dependency>
+
+Note: An additional chat memory dependency needs to be added as below:
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-chat-memory-jdbc</artifactId>
+</dependency>
+
+4. Add configuration in applications.properties file
+# needed for open ai access
+spring.ai.openai.api-key=${OPEN_AI_KEY}
+# Data source url 
+spring.datasource.url=jdbc:postgresql://localhost:5432/mydatabase
+# User name for DB
+spring.datasource.username=myuser
+# Password for DB
+spring.datasource.password=secret
+# Initilize the chat memory schema automatically 
+spring.ai.chat.memory.repository.jdbc.initialize-schema=true
+
+5. Run the application once to make sure that it starts without errors by 
+injecting your OPEN_AI_KEY 
+
+6. Create a configuration class which connects to the database 
+using the jdbcTemplate and stores all chat conversations. 
+Note: We used MessageWindowChatMemory which is an implementation
+of ChatMemory which stores maximum no. of messages, before it deletes
+the older messages. 
+In our configuration we set the maximum message limit to 10 
+using MAX_MESSAGE_SIZE=10
+
+Refer the config class at 
+ChatClientConfig.java
+
+7. Two Controller classes have 2 different ways of implementations of chat memory:
+
+InMemoryChatMemoryController.java -> Is an in memory store which stores max 10 messages
+but the messages get reset when the application terminates. 
+
+JdbcChatMemoryController.java -> Stores all chat converstation into a database table. 
+We set the maximum storage limit to 10 messages using our custom conversation id 
+set in the variable 'CONVERSTATION_ID'. In real-time application this could be replaced 
+with user id or session id or any other id as per our application choice. 
+
+
+9. Run the application in two different ways: In Memory and Database Table storage
+
+Way 1: In Memory Conversation Storage 
+curl --location 'http://localhost:8080/in-memory-chat' \
+--header 'Content-Type: application/json' \
+--data 'My name is balaji, I am 50 years of age and I come from India'
+
+curl --location 'http://localhost:8080/in-memory-chat' \
+--header 'Content-Type: application/json' \
+--data 'What is my name and where do I come from?'
+
+
+Way 2: Database Table Storage 
+curl --location 'http://localhost:8080/chat' \
+--header 'Content-Type: application/json' \
+--data 'My name is balaji, I am 50 years of age and I come from India'
+
+curl --location 'http://localhost:8080/chat' \
+--header 'Content-Type: application/json' \
+--data 'What is my name and where do I come from?'
+
+Get chat history:
+curl --location --request GET 'http://localhost:8080/chat/history' \
+--header 'Content-Type: application/json' \
+--data 'Do you know what my name is?'
+
+Delete all chat history:
+curl --location --request DELETE 'http://localhost:8080/chat/history' \
+--header 'Content-Type: application/json' 
+
+```
+
+## Prompt Engineering Patterns
+```xml
+Must read to understand Prompt Engineering Patterns 
+
+https://spring.io/blog/2025/04/14/spring-ai-prompt-engineering-patterns
+```
+
+## Additional Resources
+```xml
+Model Context Protocol (MCP) - 
+Standardized protocol that enables AI models to interact with external tools 
+and resources in a structured way
+https://docs.spring.io/spring-ai/reference/1.0/api/mcp/mcp-overview.html
+
+Evalautors - To testing the output of a model 
+https://docs.spring.io/spring-ai/reference/1.0/api/testing.html
+
+```
 
 
 ### Reference
@@ -1268,5 +1397,8 @@ https://www.cloudflare.com/learning/ai/what-is-vector-database/
 
 https://docs.spring.io/spring-ai/reference/1.0/api/tools.html
 https://www.devturtleblog.com/sring-ai-function-calling-tutorial/
+
+https://spring.io/blog/2025/04/14/spring-ai-prompt-engineering-patterns
+https://bootcamptoprod.com/spring-ai-chat-memory-guide/
 
 ```
