@@ -1359,6 +1359,98 @@ curl --location --request DELETE 'http://localhost:8080/chat/history' \
 
 ```
 
+## Mutiple AI Models - (ai-multi-model)
+```xml
+Why you might want to use multiple LLMs in your application:
+-----------------------------------------------------------
+Comparative Analysis: Different models may excel in various tasks. 
+By using multiple LLMs, you can compare outputs and choose the best result.
+
+Specialized Capabilities: Some models might be better at certain tasks, 
+like code generation or creative writing.
+
+Redundancy: Having multiple LLMs can provide fallback options 
+if one service is unavailable or rate-limited.
+
+Cost Optimization: Different providers have varying pricing models. 
+You can route requests to the most cost-effective option based on the task.
+
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Spring Web
+OpenAI
+Anthropic
+DevTools 
+
+2. Create a project 'ai-multi-model' and download
+
+3. The pom.xml will have the following dependencies: 
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-anthropic</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-openai</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-devtools</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+
+4. Add configuration in applications.properties file
+# Disable the auto-configuration for ChatClient
+# This is important for using multiple ChatClient 
+# as default injected by spring must be disabled 
+spring.ai.chat.client.enabled=false
+# Inject OpenAI key through environment variable
+spring.ai.openai.api-key=${OPENAI_API_KEY}
+# Select the OpenAI model to use
+spring.ai.openai.chat.model=gpt-4
+# Inject Anthropic key through environment variable
+spring.ai.anthropic.api-key=${ANTHROPIC_API_KEY}
+# Select the Anthropic model to use
+spring.ai.anthropic.chat.model=claude-3-sonnet-20240229
+
+5. Run the application once to make sure that it starts without errors by 
+injecting your OPENAI_API_KEY & ANTHROPIC_API_KEY through env variables
+
+6. Manually create bean definitions for each ChatClient 
+Refer the config class at 
+ChatClientConfiguration.java
+
+Here two beans are injected as openAIChatClient and anthropicAIChatClient
+(manually configuring our ChatClient)
+
+7. Two Controller classes are created:
+
+OpenAiChatController.java -> This is used for creating the ChatClient
+using OpenAI  
+
+AnthropicChatController.java -> This is used for creating the ChatClient
+using Anthropic (Claude) 
+
+8. Run the application to test the two Controllers: 
+
+curl --location 'http://localhost:8080/claude'
+
+curl --location 'http://localhost:8080/openai'
+
+Each request will return an interesting fact about the respective company, 
+demonstrating that we're successfully communicating with two different LLMs 
+in the same application.
+
+```
+
+
 ## Prompt Engineering Patterns
 ```xml
 Must read to understand Prompt Engineering Patterns 
@@ -1377,6 +1469,9 @@ Evalautors - To testing the output of a model
 https://docs.spring.io/spring-ai/reference/1.0/api/testing.html
 
 ```
+
+
+
 
 
 ### Reference
@@ -1400,5 +1495,8 @@ https://www.devturtleblog.com/sring-ai-function-calling-tutorial/
 
 https://spring.io/blog/2025/04/14/spring-ai-prompt-engineering-patterns
 https://bootcamptoprod.com/spring-ai-chat-memory-guide/
+
+https://www.danvega.dev/blog/spring-ai-multiple-llms
+
 
 ```
