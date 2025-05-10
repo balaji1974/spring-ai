@@ -1710,6 +1710,14 @@ https://spring.io/blog/2025/04/14/spring-ai-prompt-engineering-patterns
 Must read to understand Prompt Engineering Patterns 
 
 https://spring.io/blog/2025/04/14/spring-ai-prompt-engineering-patterns
+
+Important tips for prompt engineering:
+For production applications, always remember to:
+1. Test prompts with different parameters (temperature, top-k, top-p)
+2. Consider using self-consistency for critical decision-making
+3. Leverage Spring AI's entity mapping for type-safe responses
+4. Use contextual prompting to provide application-specific knowledge
+
 ```
 
 ## Additional Resources
