@@ -1450,6 +1450,260 @@ in the same application.
 
 ```
 
+## AI Prompt Engineering (ai-prompt-engineering)
+```xml
+
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Spring Web
+OpenAI
+Anthropic
+DevTools 
+
+2. Create a project 'ai-prompt-engineering' and download
+
+3. The pom.xml will have the following dependencies: 
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-anthropic</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-openai</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-devtools</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+
+4. Add configuration in applications.properties file
+# Disable the auto-configuration for ChatClient
+# This is important for using multiple ChatClient 
+# as default injected by spring must be disabled 
+spring.ai.chat.client.enabled=false
+# Inject OpenAI key through environment variable
+spring.ai.openai.api-key=${OPENAI_API_KEY}
+# Inject Anthropic key through environment variable
+spring.ai.anthropic.api-key=${ANTHROPIC_API_KEY}
+
+5. Run the application once to make sure that it starts without errors by 
+injecting your OPENAI_API_KEY & ANTHROPIC_API_KEY through env variables
+
+6. Manually create bean definitions for each ChatClient. 
+This will allow us to pick the chat client we want during runtime.
+Refer the config class at 
+MultiModelChatClientConfiguration.java
+
+Here two beans are injected as openAIChatClient and anthropicAIChatClient
+(manually configuring our ChatClient)
+
+7. Controller classes:
+
+7.1. OpenAiChatController.java
+This is used for creating the ChatClient
+using OpenAI and general OpenAI prompt option parameters are 
+explained here.
+Run this controller with the below curl command: 
+curl --location 'http://localhost:8080/openai-chatoptions'
+
+
+7.2. AnthropicChatController.java
+This is used for creating the ChatClient
+using Anthropic (Claude) and general Anthropic prompt option parameters are 
+explained here.
+Run this controller with the below curl command:
+curl --location 'http://localhost:8080/claude-chatoptions'
+
+
+7.3. Zero-Shot Prompting
+Zero-shot prompting involves asking an AI to perform a task without providing any examples. 
+This approach tests the model's ability to understand and execute instructions from scratch. 
+Large language models are trained on vast corpora of text, allowing them to understand what 
+tasks like "translation," "summarization," or "classification" entail 
+without explicit demonstrations.
+Zero-shot is ideal for straightforward tasks where the model likely has seen similar examples 
+during training, and when you want to minimize prompt length. However, performance may vary 
+depending on task complexity and how well the instructions are formulated.
+
+Sample Controller: ZeroShotController.java
+Run this controller with the below curl command:
+curl --location 'http://localhost:8080/openai-zeroshotprompting'
+
+
+7.4. One-Shot & Few-Shot Prompting
+Few-shot prompting provides the model with one or more examples to help guide its responses, 
+particularly useful for tasks requiring specific output formats. 
+By showing the model examples of desired input-output pairs, 
+it can learn the pattern and apply it to new inputs without explicit parameter updates.
+
+One-shot provides a single example, which is useful when examples are costly or 
+when the pattern is relatively simple. 
+Few-shot uses multiple examples (typically 3-5) to help the model better understand patterns in 
+more complex tasks or to illustrate different variations of correct outputs.
+
+Sample Controller: OneShotFewShotController.java
+Run this controller with the below curl command:
+curl --location 'http://localhost:8080/openai-oneshotfewshotprompting'
+
+
+7.5. System prompting
+System prompting sets the overall context and purpose for the language model, 
+defining the "big picture" of what the model should be doing. 
+It establishes the behavioral framework, constraints, 
+and high-level objectives for the model's responses, separate 
+from the specific user queries.
+
+System prompts act as a persistent "mission statement" throughout the conversation, 
+allowing you to set global parameters like output format, tone, ethical boundaries, 
+or role definitions. Unlike user prompts which focus on specific tasks, 
+system prompts frame how all user prompts should be interpreted.
+
+Sample Controller: SystemPromptController.java
+Run this controller with the below curl commands:
+curl --location 'http://localhost:8080/openai-systemprompting1'
+curl --location 'http://localhost:8080/openai-systemprompting2'
+
+
+7.6 Role prompting
+Role prompting instructs the model to adopt a specific role or persona, 
+which affects how it generates content. By assigning a particular identity, 
+expertise, or perspective to the model, you can influence the style, tone, 
+depth, and framing of its responses.
+
+Role prompting leverages the model's ability to simulate different expertise domains 
+and communication styles. Common roles include expert 
+(e.g., "You are an experienced data scientist"), professional (e.g., "Act as a travel guide"), 
+or stylistic character (e.g., "Explain like you're Shakespeare").
+
+Sample Controller: RolePromptController.java
+Run this controller with the below curl commands:
+curl --location 'http://localhost:8080/openai-roleprompting1'
+curl --location 'http://localhost:8080/openai-roleprompting2'
+
+
+7.7 Contextual Prompting
+Contextual prompting provides additional background information to the model 
+by passing context parameters. This technique enriches the model's understanding 
+of the specific situation, enabling more relevant and tailored responses 
+without cluttering the main instruction.
+
+By supplying contextual information, you help the model understand the specific domain, 
+audience, constraints, or background facts relevant to the current query. 
+This leads to more accurate, relevant, and appropriately framed responses.
+
+Sample Controller: ContextPromptController.java
+Run this controller with the below curl commands:
+curl --location 'http://localhost:8080/openai-contextprompting'
+
+
+7.8 Step-back prompting
+Step-back prompting breaks complex requests into simpler steps by first acquiring 
+background knowledge. This technique encourages the model to first "step back" 
+from the immediate question to consider the broader context, fundamental principles, 
+or general knowledge relevant to the problem before addressing the specific query.
+
+By decomposing complex problems into more manageable components and establishing 
+foundational knowledge first, the model can provide more accurate responses to 
+difficult questions.
+
+Sample Controller: StepbackPromptController.java
+Run this controller with the below curl commands:
+curl --location 'http://localhost:8080/openai-stepbackprompting'
+
+
+7.9 Chain of Thought (CoT)
+Chain of Thought prompting encourages the model to reason step-by-step through a problem, 
+which improves accuracy for complex reasoning tasks. By explicitly asking the model to show 
+its work or think through a problem in logical steps, you can dramatically improve performance 
+on tasks requiring multi-step reasoning.
+
+CoT works by encouraging the model to generate intermediate reasoning steps before 
+producing a final answer, similar to how humans solve complex problems. This makes the model's 
+thinking process explicit and helps it arrive at more accurate conclusions.
+
+Sample Controller: ChainOfThoughtPromptController.java
+Run this controller with the below curl commands:
+curl --location 'http://localhost:8080/openai-cotzeroshotprompting'
+curl --location 'http://localhost:8080/openai-cotsinglefewshotprompting'
+
+
+7.10 Self-Consistency
+Self-consistency involves running the model multiple times and aggregating results 
+for more reliable answers. This technique addresses the variability in LLM outputs by 
+sampling diverse reasoning paths for the same problem and selecting the most 
+consistent answer through majority voting.
+
+By generating multiple reasoning paths with different temperature or sampling settings, 
+then aggregating the final answers, self-consistency improves accuracy on complex reasoning 
+tasks. It's essentially an ensemble method for LLM outputs.
+
+Sample Controller: SelfConsistencyPromptController.java
+Run this controller with the below curl commands:
+curl --location 'http://localhost:8080/openai-selfconsistencyprompting'
+
+
+7.11 Tree of Thoughts (ToT)
+Tree of Thoughts (ToT) is an advanced reasoning framework that extends Chain of Thought 
+by exploring multiple reasoning paths simultaneously. It treats problem-solving as a 
+search process where the model generates different intermediate steps, 
+evaluates their promise, and explores the most promising paths.
+
+This technique is particularly powerful for complex problems with multiple possible 
+approaches or when the solution requires exploring various alternatives 
+before finding the optimal path.
+
+Sample Controller: TreeOfThoughtPromptController.java
+Run this controller with the below curl commands:
+curl --location 'http://localhost:8080/openai-treeofthoughtprompting'
+
+
+7.12 Automatic Prompt Engineering
+Automatic Prompt Engineering uses the AI to generate and evaluate alternative prompts. 
+This meta-technique leverages the language model itself to create, refine, 
+and benchmark different prompt variations to find optimal formulations for specific tasks.
+
+By systematically generating and evaluating prompt variations, 
+APE can find more effective prompts than manual engineering, 
+especially for complex tasks. It's a way of using AI to improve its own performance.
+
+Sample Controller: AutomaticPromptController.java
+Run this controller with the below curl commands:
+curl --location 'http://localhost:8080/openai-automaticprompting'
+
+
+7.13 Code prompting
+Code prompting refers to specialized techniques for code-related tasks. 
+These techniques leverage LLMs' ability to understand and generate programming languages, 
+enabling them to write new code, explain existing code, debug issues, and translate between languages.
+
+Effective code prompting typically involves clear specifications, appropriate context 
+(libraries, frameworks, style guidelines), and sometimes examples of similar code. 
+Temperature settings tend to be lower (0.1-0.3) for more deterministic outputs.
+
+Sample Controller: CodePromptController.java 
+Run this controller with the below curl commands:
+
+# The below curl is used for code prompting
+curl --location 'http://localhost:8080/openai-codeprompting'
+
+# The below curl is used for code prompting along with explaination
+curl --location 'http://localhost:8080/openai-explaincodeprompting'
+
+# The below curl is used for code in one programming lanuage to another programming language 
+curl --location 'http://localhost:8080/openai-translatecodeprompting'
+
+
+Reference: 
+https://spring.io/blog/2025/04/14/spring-ai-prompt-engineering-patterns
+```
 
 ## Prompt Engineering Patterns
 ```xml
