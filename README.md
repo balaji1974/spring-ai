@@ -1720,6 +1720,17 @@ For production applications, always remember to:
 
 ```
 
+## ChromaDB
+```xml
+docker pull chromadb/chroma
+docker run -v <path-to-store-chromadb> -p 8000:8000 chromadb/chroma
+eg. docker run -v ./chroma-data:/data -p 8000:8000 chromadb/chroma
+
+
+
+```
+
+
 ## Additional Resources
 ```xml
 Model Context Protocol (MCP) - 
@@ -1731,6 +1742,7 @@ Evalautors - To testing the output of a model
 https://docs.spring.io/spring-ai/reference/1.0/api/testing.html
 
 ```
+
 
 
 
@@ -1759,6 +1771,6 @@ https://spring.io/blog/2025/04/14/spring-ai-prompt-engineering-patterns
 https://bootcamptoprod.com/spring-ai-chat-memory-guide/
 
 https://www.danvega.dev/blog/spring-ai-multiple-llms
-
+https://huggingface.co/models
 
 ```
