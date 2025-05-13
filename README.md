@@ -1720,11 +1720,14 @@ For production applications, always remember to:
 
 ```
 
-## ChromaDB
+## ChromaDB (same as pgvector)
 ```xml
 docker pull chromadb/chroma
 docker run -v <path-to-store-chromadb> -p 8000:8000 chromadb/chroma
 eg. docker run -v ./chroma-data:/data -p 8000:8000 chromadb/chroma
+
+After starting run the following command to check: 
+http://localhost:8000/docs/
 
 
 
