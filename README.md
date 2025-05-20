@@ -1730,9 +1730,148 @@ After starting run the following command to check:
 http://localhost:8000/docs/
 
 
+```
+
+## Model Context Protocol and why we need it? 
+```xml
+The Model Context Protocol (MCP) is a standardized protocol that enables AI models 
+to interact with external tools and resources in a structured way. 
+It supports multiple transport mechanisms to provide flexibility across 
+different environments.
+
+The MCP Java SDK provides a Java implementation of the Model Context Protocol, 
+enabling standardized interaction with AI models and tools through both synchronous 
+and asynchronous communication patterns.
+
+Spring AI MCP extends the MCP Java SDK with Spring Boot integration, 
+providing both client and server starters. 
+Bootstrap your AI applications with MCP support using Spring Initializer.
+```
+
+## Spring AI MCP Server (ai-mcp-server)
+```xml
+
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Model Context Protocol Server
+DevTools 
+
+2. Create a project 'ai-mcp-server' and download
+
+3. The pom.xml will have the following dependencies: 
+Note: Replace the spring-ai-mcp-server-spring-boot-starter with 
+spring-ai-starter-mcp-server-webflux -> as we will use webflux 
+
+<dependency>
+    <groupId>org.springframework.ai</groupId>
+    <artifactId>spring-ai-starter-mcp-server-webflux</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+    <scope>runtime</scope>
+    <optional>true</optional>
+</dependency>
+
+4. Add configuration in applications.properties file
+# MCP server name
+spring.ai.mcp.server.name=ai-mcp-server
+# MCP server version
+spring.ai.mcp.server.version=0.0.1
+# Port to start the application
+server.port: 8060
+# Logging level set to DEBUG to check what happens in the server 
+# when the client sends the request
+logging.level.org.springframework.ai: DEBUG
+
+5. Run the application once to make sure that it starts without errors 
+
+6. Create a DTO called Course that holds the output 
+Course.java
+We keep it simple with just 2 attributes title and url
+
+7. Next we create the Service layer which hold the Tools that 
+we want to enable our AI to refer to. 
+CourseService.java 
+Two tools will be registered from this service:
+getAllCourses -> Which will list all courses available 
+getCourse -> Which will fetch a course based on the title 
+
+8. Next we create a config class where we register our bean 
+which will list our tools using ToolsCallBack. 
+ToolsConfig.java
+
+9. Finally run the server to check if our tools are registered properly.
+-> Registered tools: 2, notification: true (from the log)
 
 ```
 
+
+## Spring AI MCP Client (ai-mcp-client)
+```xml
+
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Model Context Protocol Client
+Spring AI
+Spring Web
+DevTools 
+
+2. Create a project 'ai-mcp-client' and download
+
+3. The pom.xml will have the following dependencies: 
+Note: Replace the spring-ai-mcp-client-spring-boot-starter with 
+spring-ai-starter-mcp-client-webflux -> as we will use webflux
+
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-mcp-client-webflux</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-openai</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-devtools</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+
+4. Add configuration in applications.properties file
+# MCP Client name
+spring.application.name=ai-mcp-client
+# Open AI API key 
+spring.ai.openai.api-key=${OPEN_AI_KEY}
+# MCP Server URL 
+spring.ai.mcp.client.sse.connections.ai-mcp-server.url=http://localhost:8060
+
+5. Run the application once by injecting the OPEN_AI_KEY as environment variable 
+to make sure that it starts without errors 
+
+6. Create a controller called 
+ToolUsageController.java 
+where we inject tools callback provider in our constructor and set the 
+default tool callback: 
+defaultToolCallbacks(toolsCallbackProvider.getToolCallbacks())
+
+We also create two methods getAllCourses and getDetailsOfACourse with HTTP end points 
+that will use the tools already injected as default tool callback in the constructor. 
+
+7. Finally run the client application and test it: 
+curl --location 'http://localhost:8080/tool1'
+curl --location 'http://localhost:8080/tool2' 
+
+Note: Hardcoded PromptTemplate values will be dropped and dynamic data 
+will be passed in production applications. 
+
+```
 
 ## Additional Resources
 ```xml
