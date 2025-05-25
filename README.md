@@ -551,6 +551,15 @@ Note: I created the hello.mp3 from the following website: https://ttsmp3.com/
 
 ## OpenAI RAG - Retrieval Augmented Generation (ai-rag-textreader)
 ```xml
+# Retrieve: When you ask a question, the system first searches your specific knowledge base 
+(documents, databases, etc.) for information relevant to your query.
+
+# Augment: This retrieved information (the “context”) is then added to your original question 
+and sent as a more detailed prompt to the LLM.
+
+# Generate: The LLM uses both your question and the provided context to 
+generate an informed answer.
+
 # Vector Database: 
 A vector database is a collection of data stored as mathematical representations. 
 Vector databases make it easier for machine learning models to remember previous inputs, 
@@ -1883,6 +1892,9 @@ https://docs.spring.io/spring-ai/reference/1.0/api/mcp/mcp-overview.html
 Evalautors - To testing the output of a model 
 https://docs.spring.io/spring-ai/reference/1.0/api/testing.html
 
+Langchain4j: 
+https://dzone.com/articles/chat-with-your-knowledge-base-java-langchain4j-guide?edition=598293
+
 ```
 
 
@@ -1914,5 +1926,7 @@ https://bootcamptoprod.com/spring-ai-chat-memory-guide/
 
 https://www.danvega.dev/blog/spring-ai-multiple-llms
 https://huggingface.co/models
+
+https://dzone.com/articles/chat-with-your-knowledge-base-java-langchain4j-guide?edition=598293
 
 ```
