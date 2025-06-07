@@ -498,6 +498,9 @@ curl --location 'http://localhost:8080/ask-ai-recipe-creator?ingredients=chicken
 ## OpenAI - Audio Transcription model - Step by Step (ai-audio-transcribe)
 ```xml
 1. Add the Spring AI dependency. 
+Spring Web
+Open AI
+Dev Tools
 
 2. In the application.properties file add the following: 
 spring.ai.openai.api-key=<your api key>
@@ -548,6 +551,86 @@ curl --location 'http://localhost:8080/ai-audio-transcriptor?file=null' \
 Note: I created the hello.mp3 from the following website: https://ttsmp3.com/
 
 ```
+
+## OpenAI - Text to Speech - Step by Step (ai-audio-text2speech)
+```xml
+1. Add the Spring AI dependency. 
+Spring Web
+Open AI
+Dev Tools
+
+2. In the application.properties file add the following: 
+spring.ai.openai.api-key=<your api key>
+
+3. Create a Service 'TextToSpeechService'
+We use OpenAiAudioSpeechModel, which Spring AI preconfigures using our properties. 
+We also define the makeSpeech() method to convert text into audio file bytes 
+with OpenAiAudioSpeechModel.
+We configure 3 different formats of makeSpeech 
+makeSpeech, makeSpeech with Options and makeSpeechStream
+
+4. Create a controller 'TextToSpeechController' and inject the following:
+private final TextToSpeechService textToSpeechService;
+
+@Autowired
+public TextToSpeechController(TextToSpeechService textToSpeechService) {
+    this.textToSpeechService = textToSpeechService;
+}
+
+5. Create three different ResponseEntity as follows:
+@GetMapping("/text-to-speech-customized")
+public ResponseEntity<byte[]> generateSpeechForTextCustomized(@RequestParam("text") String text, @RequestParam Map<String, String> params) {
+    OpenAiAudioSpeechOptions speechOptions = OpenAiAudioSpeechOptions.builder()
+      .model(params.get("model"))
+      .voice(OpenAiAudioApi.SpeechRequest.Voice.valueOf(params.get("voice")))
+      .responseFormat(OpenAiAudioApi.SpeechRequest.AudioResponseFormat.valueOf(params.get("responseFormat")))
+      .speed(Float.parseFloat(params.get("speed")))
+      .build();
+
+    return ResponseEntity.ok(textToSpeechService.makeSpeech(text, speechOptions));
+}
+
+@GetMapping("/text-to-speech")
+public ResponseEntity<byte[]> generateSpeechForText(@RequestParam("text") String text) {
+    return ResponseEntity.ok(textToSpeechService.makeSpeech(text));
+}
+
+@GetMapping(value = "/text-to-speech-stream", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+public ResponseEntity<StreamingResponseBody> streamSpeech(@RequestParam("text") String text) {
+    Flux<byte[]> audioStream = textToSpeechService.makeSpeechStream(text);
+
+    StreamingResponseBody responseBody = outputStream -> {
+        audioStream.toStream().forEach(bytes -> {
+            try {
+                outputStream.write(bytes);
+                outputStream.flush();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
+    };
+
+    return ResponseEntity.ok()
+      .contentType(MediaType.APPLICATION_OCTET_STREAM)
+      .body(responseBody);
+}
+
+5. Run the application. 
+
+6. Run the following from command line or postman:
+curl --location 'http://localhost:8080/text-to-speech?text=This%20is%20balaji%20saying%20hello%20to%20all' \
+--data ''
+
+curl --location 'http://localhost:8080/text-to-speech-customized?text=Hello%20from%20Balaji&model=tts-1&voice=NOVA&responseFormat=MP3&speed=1.0' \
+--data ''
+
+curl --location 'http://localhost:8080/text-to-speech-stream?text=This%20is%20balaji%20saying%20hello%20to%20all' \
+--data ''
+
+Note: I saved the response into an mp3 file and later played it. 
+
+```
+
 
 ## OpenAI RAG - Retrieval Augmented Generation (ai-rag-textreader)
 ```xml
@@ -1928,5 +2011,6 @@ https://www.danvega.dev/blog/spring-ai-multiple-llms
 https://huggingface.co/models
 
 https://dzone.com/articles/chat-with-your-knowledge-base-java-langchain4j-guide?edition=598293
+https://www.baeldung.com/spring-ai-openai-tts
 
 ```
