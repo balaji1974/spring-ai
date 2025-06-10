@@ -1978,6 +1978,9 @@ https://docs.spring.io/spring-ai/reference/1.0/api/testing.html
 Langchain4j: 
 https://dzone.com/articles/chat-with-your-knowledge-base-java-langchain4j-guide?edition=598293
 
+Building Effective Agents with Spring AI
+https://spring.io/blog/2025/01/21/spring-ai-agentic-patterns
+
 ```
 
 
