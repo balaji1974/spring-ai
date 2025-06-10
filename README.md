@@ -1965,6 +1965,98 @@ will be passed in production applications.
 
 ```
 
+
+## Spring AI Ollama Huggingface (ai-chat-ollama-huggingface)
+```xml
+
+We can use Ollama, an open-source tool, to run LLMs on our local machines. 
+It supports running GGUF format models from Hugging Face.
+
+Ollama now supports all GGUF models from Hugging Face, 
+allowing access to over 45,000 community-created models through Spring AI's 
+Ollama integration, runnable locally.
+
+In this tutorial, we’ll explore how to use Hugging Face models with Spring AI and Ollama. 
+We’ll build a simple chatbot using a chat completion model
+
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Ollama
+Spring Web
+DevTools 
+
+2. Create a project 'ai-chat-ollama-huggingface' and download
+
+3. The pom.xml will have the following dependencies: 
+
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-ollama</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-devtools</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+
+4. Add configuration in applications.properties file
+# Application name
+spring.application.name=ai-chat-ollama-huggingface
+# Enables automatic model pulling at startup time. 
+# For production, you should pre-download the models to avoid delays
+spring.ai.ollama.init.pull-model-strategy=always
+# Specifies the Hugging Face GGUF model to use using theformat: hf.co/{username}/{repository}
+spring.ai.ollama.chat.options.model=hf.co/microsoft/Phi-3-mini-4k-instruct-gguf
+
+
+5. Create a configuration class ChatbotConfiguration.java  
+to configure 2 beans: 
+ChatMemory -> using InMemoryChatMemory
+ChatClient -> using MessageChatMemoryAdvisor
+
+6. Create 2 record classes as for DTOs.
+ChatRequest.java
+ChatResponse.java
+
+7. Create a service class called ChatbotService.java 
+to inject the ChatClient 
+and a ChatResponse chat method that takes a ChatRequest and 
+results in a ChatResponse
+
+
+8. Create a controller called 
+ChatController.java 
+which is a RestController and we inject the 
+ChatbotService into this controller. 
+
+We also create a method called chat that takes 
+ChatRequest and sends a ChatResponse as ResponseEntity 
+
+7. Finally run the application and test it: 
+curl --location 'http://localhost:8080/chat' \
+--header 'Content-Type: application/json' \
+--data '{
+    "question": "Who wanted to kill Harry Potter?"
+}'
+
+Copy the  chatId and pass it as input the second call. 
+
+curl --location 'http://localhost:8080/chat' \
+--header 'Content-Type: application/json' \
+--data '{
+"chatId": "<your UUID>",
+"question" : "Who should he have gone after instead?"
+}'
+
+```
+
+
 ## Additional Resources
 ```xml
 Model Context Protocol (MCP) - 
@@ -2015,5 +2107,6 @@ https://huggingface.co/models
 
 https://dzone.com/articles/chat-with-your-knowledge-base-java-langchain4j-guide?edition=598293
 https://www.baeldung.com/spring-ai-openai-tts
+https://www.baeldung.com/spring-ai-ollama-hugging-face-models
 
 ```
