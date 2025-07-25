@@ -497,9 +497,14 @@ curl --location 'http://localhost:8080/ask-ai-recipe-creator?ingredients=chicken
 
 ## OpenAI - Audio Transcription model - Step by Step (ai-audio-transcribe)
 ```xml
-This program converts an Mp3 file to a text file
-Supported languages as per ISO_639 language codes
+This program converts an Mp3 file to a text file and translates the file
+to any of the supported languages
+
+Languages as per ISO_639 language codes
 https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
+
+Open AI Support Languages:
+https://platform.openai.com/docs/guides/speech-to-text/supported-languages
 
 1. Add the Spring AI dependency. 
 Spring Web
@@ -554,13 +559,41 @@ or fix the <your-file-location> to the correct location of your mp3 file
 before importing the curl into Postman. 
 
 6. Run the following from command line or postman:
+Audio To Text - French - Response(JSON):
 curl --location 'http://localhost:8080/ai-audio-transcriptor' \
---form 'file=@"/Users/balaji/eclipse-workspace/spring-ai/ai-audio-transcribe/resource/hello.mp3"' \
---form 'language="fr"'
+--form 'file=@"<your-file-location>/hello.mp3"' \
+--form 'language="fr"' \
+--form 'responseFormat="JSON"'
 
+Audio To Text - French - Response(VTT):
 curl --location 'http://localhost:8080/ai-audio-transcriptor' \
---form 'file=@"/Users/balaji/eclipse-workspace/spring-ai/ai-audio-transcribe/resource/hello.mp3"' \
---form 'language="ta"'
+--form 'file=@"<your-file-location>/hello.mp3"' \
+--form 'language="fr"' \
+--form 'responseFormat="VTT"'
+
+Audio To Text - Tamil - Response(JSON):
+curl --location 'http://localhost:8080/ai-audio-transcriptor' \
+--form 'file=@"<your-file-location>/hello.mp3"' \
+--form 'language="ta"' \
+--form 'responseFormat="JSON"'
+
+Audio To Text - Tamil - Response(VTT):
+curl --location 'http://localhost:8080/ai-audio-transcriptor' \
+--form 'file=@"<your-file-location>/hello.mp3"' \
+--form 'language="ta"' \
+--form 'responseFormat="VTT"'
+
+Audio To Text - Arabic - Response(JSON):
+curl --location 'http://localhost:8080/ai-audio-transcriptor' \
+--form 'file=@"<your-file-location>/hello.mp3"' \
+--form 'language="ar"' \
+--form 'responseFormat="JSON"'
+
+Audio To Text - Arabic - Response(VTT):
+curl --location 'http://localhost:8080/ai-audio-transcriptor' \
+--form 'file=@"<your-file-location>/hello.mp3"' \
+--form 'language="ar"' \
+--form 'responseFormat="VTT"'
 
 Note: I created the hello.mp3 from the following website: https://ttsmp3.com/
 

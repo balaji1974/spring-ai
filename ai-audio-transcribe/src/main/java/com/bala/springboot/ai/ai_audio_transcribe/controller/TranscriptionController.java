@@ -33,14 +33,15 @@ public class TranscriptionController {
     @PostMapping("ai-audio-transcriptor")
     public ResponseEntity<?> transcribeAudio(
     		@RequestParam("language") String lang,
+    		@RequestParam("responseFormat") String reponseFormat,
             @RequestParam("file") MultipartFile file) throws IOException {
         File tempFile = File.createTempFile("audio",".wav");
         file.transferTo(tempFile);
         
         
         OpenAiAudioTranscriptionOptions transcriptionOptions = OpenAiAudioTranscriptionOptions.builder()
-                .responseFormat(OpenAiAudioApi.TranscriptResponseFormat.VTT)
-                //.responseFormat(OpenAiAudioApi.TranscriptResponseFormat.JSON)
+                //.responseFormat(OpenAiAudioApi.TranscriptResponseFormat.valueOf("VTT"))
+                .responseFormat(OpenAiAudioApi.TranscriptResponseFormat.valueOf(reponseFormat))
                 .language(lang)
                 .temperature(0f)
                 .build();
