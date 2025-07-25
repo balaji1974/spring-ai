@@ -1,4 +1,4 @@
-package com.bala.springboot.ai.ai_chat_assistant_formatted_output.model;
+package com.bala.springboot.ai.ai_chat_assistant.util;
 
 public class Article {
 	

@@ -190,21 +190,14 @@ and you will receive a response which can be displayed on the screen
 Full details of this example can be found here:
 https://docs.spring.io/spring-ai/reference/api/chatclient.html
 
-***Note: This sample is just a tip of an iceberg of what chat assistant could do******
-
-```
-
-## OpenAI Chatbot - Formatting the output (ai-chat-assistant-formatted-output)
-```xml
-
-@RestController() -> This opens up an URL http://localhost:8080/chat/query
+Open AI chat assistant with formatted output:
+@RestController() -> This opens up an URL http://localhost:8080/chat/query-formatted
 to which you can submit your chating prompt 
-
 
 There is also an overloaded entity method with the signature 
 entity(ParameterizedTypeReference<T> type) that lets you specify types 
 such as generic Lists:
-@GetMapping("/chat/query")
+@GetMapping("/chat/query-formatted")
 List<Article> askQuestion(@RequestParam(name = "question") String question) {
     return chatClient.prompt()
       .user(question)
@@ -224,8 +217,11 @@ Article model consist of the following structure:
 Note: This is how my output will be formatted
 
 Run the service and call the url like this example below: 
-curl --location 'http://localhost:8080/chat/query?question=Who%20are%20the%20top%2010%20actors%20in%20the%20world%3F'
-curl --location 'http://localhost:8080/chat/query?question=What%20is%20the%20top%205%20language%20model%20for%20AI%3F'
+Open AI Chat Assistant - Formatted - (Top 20 AI Models):
+curl --location 'http://localhost:8080/chat/query-formatted?question=What%20is%20the%20top%205%20language%20model%20for%20AI'
+
+Open AI Chat Assistant - Formatted - (Top 10 Actors - Hollywood):
+curl --location 'http://localhost:8080/chat/query-formatted?question=Who%20are%20the%20top%2010%20actors%20in%20the%20world'
 
 and you will receive a formatted response which can be displayed on the screen 
 
@@ -234,7 +230,6 @@ https://spring.io/blog/2024/05/09/spring-ai-structured-output
 https://docs.spring.io/spring-ai/reference/api/chatclient.html
 
 ```
-
 
 ## OpenAI Chatbot - Step by Step (ai-prompt-assistant)
 ```xml
