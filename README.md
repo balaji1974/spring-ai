@@ -615,19 +615,21 @@ public ResponseEntity<StreamingResponseBody> streamSpeech(@RequestParam("text") 
       .body(responseBody);
 }
 
+Note: Check the actual code, which is refactored to handle errors. 
+
 5. Run the application. 
 
 6. Run the following from command line or postman:
-curl --location 'http://localhost:8080/text-to-speech?text=This%20is%20balaji%20saying%20hello%20to%20all' \
---data ''
+curl --location 'http://localhost:8080/text-to-speech?text=This%20is%20balaji%20saying%20hello%20to%20all'
 
-curl --location 'http://localhost:8080/text-to-speech-customized?text=Hello%20from%20Balaji&model=tts-1&voice=NOVA&responseFormat=MP3&speed=1.0' \
---data ''
+curl --location 'http://localhost:8080/text-to-speech-customized?text=Hello%20from%20Balaji&model=tts-1&voice=coral&responseFormat=MP3&speed=1.0'
 
-curl --location 'http://localhost:8080/text-to-speech-stream?text=This%20is%20balaji%20saying%20hello%20to%20all' \
---data ''
+curl --location 'http://localhost:8080/text-to-speech-stream?text=This%20is%20a%20nice%20test%20to%20demonstrate%20text%20to%20speech%20using%20streams%20and%20default%20speech%20parameters'
 
-Note: I saved the response into an mp3 file and later played it. 
+curl --location 'http://localhost:8080/text-to-speech-stream-customize?text=This%20is%20a%20nice%20test%20to%20demonstrate%20text%20to%20speech%20using%20streams%20and%20dynamic%20speech%20parameters&model=tts-1&voice=shimmer&responseFormat=MP3&speed=1.0'
+
+Note: For curl response 3 and 4, I saved the response into an mp3 file from postman and later played it. 
+In real senarios this can be streamed on to a browser directly and played using javascript libraries.
 
 ```
 
