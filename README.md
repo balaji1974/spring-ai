@@ -497,6 +497,10 @@ curl --location 'http://localhost:8080/ask-ai-recipe-creator?ingredients=chicken
 
 ## OpenAI - Audio Transcription model - Step by Step (ai-audio-transcribe)
 ```xml
+This program converts an Mp3 file to a text file
+Supported languages as per ISO_639 language codes
+https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
+
 1. Add the Spring AI dependency. 
 Spring Web
 Open AI
@@ -543,10 +547,20 @@ public ResponseEntity<String> transcribeAudio(
 }
 
 5. Run the application. 
+To run the application once you import the Postman curl commmand below, 
+go to Body -> Form data -> and in re-import the hello.mp3 file once 
+from your local machine before you can execute the below curl command 
+or fix the <your-file-location> to the correct location of your mp3 file 
+before importing the curl into Postman. 
 
 6. Run the following from command line or postman:
-curl --location 'http://localhost:8080/ai-audio-transcriptor?file=null' \
---form 'file=@"/<your-file-location>/hello.mp3"'
+curl --location 'http://localhost:8080/ai-audio-transcriptor' \
+--form 'file=@"/Users/balaji/eclipse-workspace/spring-ai/ai-audio-transcribe/resource/hello.mp3"' \
+--form 'language="fr"'
+
+curl --location 'http://localhost:8080/ai-audio-transcriptor' \
+--form 'file=@"/Users/balaji/eclipse-workspace/spring-ai/ai-audio-transcribe/resource/hello.mp3"' \
+--form 'language="ta"'
 
 Note: I created the hello.mp3 from the following website: https://ttsmp3.com/
 
@@ -554,6 +568,8 @@ Note: I created the hello.mp3 from the following website: https://ttsmp3.com/
 
 ## OpenAI - Text to Speech - Step by Step (ai-audio-text2speech)
 ```xml
+This program converts input text to an audio file using Open AI libraries 
+
 1. Add the Spring AI dependency. 
 Spring Web
 Open AI
@@ -620,12 +636,17 @@ Note: Check the actual code, which is refactored to handle errors.
 5. Run the application. 
 
 6. Run the following from command line or postman:
+
+Test2Speech With Static Parameters:
 curl --location 'http://localhost:8080/text-to-speech?text=This%20is%20balaji%20saying%20hello%20to%20all'
 
+Text2Speech With Dynamic Parameters:
 curl --location 'http://localhost:8080/text-to-speech-customized?text=Hello%20from%20Balaji&model=tts-1&voice=coral&responseFormat=MP3&speed=1.0'
 
+Text2Speech Streams With Static Parameters:
 curl --location 'http://localhost:8080/text-to-speech-stream?text=This%20is%20a%20nice%20test%20to%20demonstrate%20text%20to%20speech%20using%20streams%20and%20default%20speech%20parameters'
 
+Text2Speech Streams With Dynamic Parameters:
 curl --location 'http://localhost:8080/text-to-speech-stream-customize?text=This%20is%20a%20nice%20test%20to%20demonstrate%20text%20to%20speech%20using%20streams%20and%20dynamic%20speech%20parameters&model=tts-1&voice=shimmer&responseFormat=MP3&speed=1.0'
 
 Note: For curl response 3 and 4, I saved the response into an mp3 file from postman and later played it. 

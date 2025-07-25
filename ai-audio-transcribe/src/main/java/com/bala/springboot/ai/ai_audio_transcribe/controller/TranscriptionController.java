@@ -31,15 +31,17 @@ public class TranscriptionController {
     
     @CrossOrigin(origins = "http://localhost:5173", maxAge = 3600)
     @PostMapping("ai-audio-transcriptor")
-    public ResponseEntity<String> transcribeAudio(
+    public ResponseEntity<?> transcribeAudio(
+    		@RequestParam("language") String lang,
             @RequestParam("file") MultipartFile file) throws IOException {
         File tempFile = File.createTempFile("audio",".wav");
         file.transferTo(tempFile);
-
+        
         
         OpenAiAudioTranscriptionOptions transcriptionOptions = OpenAiAudioTranscriptionOptions.builder()
-                .responseFormat(OpenAiAudioApi.TranscriptResponseFormat.TEXT)
-                .language("en")
+                .responseFormat(OpenAiAudioApi.TranscriptResponseFormat.VTT)
+                //.responseFormat(OpenAiAudioApi.TranscriptResponseFormat.JSON)
+                .language(lang)
                 .temperature(0f)
                 .build();
 
