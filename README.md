@@ -1392,6 +1392,16 @@ curl --location 'http://localhost:8080/weather-tools' \
 
 ## Chat Memory (a session managment alternative for AI models) - (ai-chat-memory)
 ```xml 
+
+Prerequisite:
+a. Docker desktop to be installed
+b. Pull command: docker pull postgres
+c. Run Command: docker run --name chat-memory -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d postgres
+d. Connect with PGAdmin into the running container 
+e. Create a user called 'myuser' with password 'secret'
+f. Create a database called 'mydatabase' and make user 'myuser' as the owner of this database
+
+
 1. Spring Initilizer
 Go to spring initilizer page https://start.spring.io/ 
 and add the following dependencies: 
@@ -1474,33 +1484,45 @@ with user id or session id or any other id as per our application choice.
 
 9. Run the application in two different ways: In Memory and Database Table storage
 
-Way 1: In Memory Conversation Storage 
+Way 1: In Memory Conversation Storage (will get deleted when server restarts)
+
+Insert into Table (InMemory) - 01:
 curl --location 'http://localhost:8080/in-memory-chat' \
 --header 'Content-Type: application/json' \
---data 'My name is balaji, I am 50 years of age and I come from India'
+--data 'My name is Vikram, I am 35 years of age and I travelled to London last winter'
 
+Insert into Table (InMemory) - 02:
 curl --location 'http://localhost:8080/in-memory-chat' \
 --header 'Content-Type: application/json' \
---data 'What is my name and where do I come from?'
+--data 'Do you know where I travelled last winter?'
 
 
-Way 2: Database Table Storage 
+Way 2: Database Table Storage (will get stored even if server restarts)
+
+Insert into Table (JDBC): 
 curl --location 'http://localhost:8080/chat' \
 --header 'Content-Type: application/json' \
 --data 'My name is balaji, I am 50 years of age and I come from India'
 
+Retreive from Chat (JDBC): 
 curl --location 'http://localhost:8080/chat' \
 --header 'Content-Type: application/json' \
 --data 'What is my name and where do I come from?'
 
-Get chat history:
-curl --location --request GET 'http://localhost:8080/chat/history' \
+Retreive Conversation History (JDBC):
+curl --location 'http://localhost:8080/chat/history' \
 --header 'Content-Type: application/json' \
---data 'Do you know what my name is?'
+--data ''
 
-Delete all chat history:
+Delete Conversation History (JDBC): 
 curl --location --request DELETE 'http://localhost:8080/chat/history' \
---header 'Content-Type: application/json' 
+--header 'Content-Type: application/json'
+
+** Important **
+Remember the limitations of InMemoryChatMemory: it's not persistent and 
+won't work across multiple application instances. For production scenarios, 
+you'd explore database-backed or cache-backed ChatMemory implementations 
+(or build your own).
 
 ```
 
