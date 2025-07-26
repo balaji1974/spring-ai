@@ -10,16 +10,31 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 class ChatbotConfiguration {
+	
     @Bean
     public ChatMemory chatMemory() {
         return new InMemoryChatMemory();
     }
-
+	
+	
     @Bean
+    //public ChatClient chatClient(ChatClient.Builder builder) {
     public ChatClient chatClient(ChatModel chatModel, ChatMemory chatMemory) {
         return ChatClient
           .builder(chatModel)
           .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
           .build();
+        
+        
+    	
+    	/* 1.0.0-M8 */
+    	/*
+    	return builder
+                .defaultAdvisors(new PromptChatMemoryAdvisor( 
+                		MessageWindowChatMemory.builder() 
+                	    .maxMessages(10)
+                	    .build()
+                		))
+                .build();*/
     }
 }

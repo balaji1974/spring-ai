@@ -1400,6 +1400,8 @@ c. Run Command: docker run --name chat-memory -e POSTGRES_PASSWORD=mysecretpassw
 d. Connect with PGAdmin into the running container 
 e. Create a user called 'myuser' with password 'secret'
 f. Create a database called 'mydatabase' and make user 'myuser' as the owner of this database
+g. When the server starts a table called ai_chat_memory will be created automatically under the 
+public schema if mydatabase automatically 
 
 
 1. Spring Initilizer
@@ -2040,6 +2042,101 @@ will be passed in production applications.
 
 ```
 
+## Spring AI Ollama (ai-ollama)
+```xml
+We can use Ollama, an open-source tool, to run LLMs on our local machines. 
+In this tutorial, we’ll explore how to use Spring AI and Ollama. 
+
+Prerequisite:
+Download and install Ollama for the local machine:
+https://ollama.com/download
+
+Pull a chat model (Examples below):
+ollama pull llama3.2
+ollama pull MISTRAL
+ollama pull deepseek-r1
+
+List and check all the currently installed models:
+ollama list
+
+List of models supported by Ollama: 
+https://ollama.com/library
+
+Now we’ll build a simple Mathematical equation solver using a Ollama model. 
+
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Ollama
+Spring Web
+DevTools 
+
+2. Create a project 'ai-ollama' and download
+
+3. The pom.xml will have the following dependencies: 
+
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-ollama</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-devtools</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+
+4. Add configuration in applications.properties file
+# Application name
+spring.application.name=ai-ollama
+# Enables automatic model pulling only when missing at startup time. 
+# For production, you should pre-download the models to avoid delays
+spring.ai.ollama.init.pull-model-strategy=when_missing
+# During startup pull all supported models
+spring.ai.ollama.chat.options.model=LLAMA3.2
+spring.ai.ollama.init.chat.additional-models=mistral,DeepSeek-R1
+
+
+5. Create a controller called OllamaController.java 
+which is a RestController and we inject the 
+ChatModel into this controller. 
+
+We also create a method called solveEquation that takes 
+UserInput as input parameters and returns a String response.
+
+6. Finally run the application and test it with different 
+Ollama supported models:
+
+SolveEquation - Using Llama3.2:
+curl --location 'http://localhost:8080/solve' \
+--header 'Content-Type: application/json' \
+--data '{
+    "equation": "how can I solve 8x + 7 = -29",
+    "model" : "LLAMA3.2"
+}' 
+
+SolveEquation - Using Mistral:
+curl --location 'http://localhost:8080/solve' \
+--header 'Content-Type: application/json' \
+--data '{
+    "equation": "how can I solve 8x + 7 = -29",
+    "model" : "MISTRAL"
+}'
+
+SolveEquation - Using Deepseek R1:
+curl --location 'http://localhost:8080/solve' \
+--header 'Content-Type: application/json' \
+--data '{
+    "equation": "how can I solve 8x + 7 = -29",
+    "model" : "DeepSeek-R1"
+}'
+
+```
+
 
 ## Spring AI Ollama Huggingface (ai-chat-ollama-huggingface)
 ```xml
@@ -2086,7 +2183,9 @@ spring.application.name=ai-chat-ollama-huggingface
 # Enables automatic model pulling at startup time. 
 # For production, you should pre-download the models to avoid delays
 spring.ai.ollama.init.pull-model-strategy=always
-# Specifies the Hugging Face GGUF model to use using theformat: hf.co/{username}/{repository}
+# Specifies the Hugging Face GGUF model to use using the format: hf.co/{username}/{repository}
+# List of available models an be found here:
+# https://huggingface.co/models?library=gguf&sort=trending
 spring.ai.ollama.chat.options.model=hf.co/microsoft/Phi-3-mini-4k-instruct-gguf
 
 
@@ -2120,7 +2219,8 @@ curl --location 'http://localhost:8080/chat' \
     "question": "Who wanted to kill Harry Potter?"
 }'
 
-Copy the  chatId and pass it as input the second call. 
+Copy the  chatId and pass it as input to the second call,
+ to maintain the same context of the chat.  
 
 curl --location 'http://localhost:8080/chat' \
 --header 'Content-Type: application/json' \
