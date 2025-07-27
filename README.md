@@ -288,55 +288,76 @@ public String getRespone(@RequestParam String prompt) {
 
 9. Start the application and execute the service from a browser 
 or postman or from command line using curl 
-curl --location 'http://localhost:8080/ask-ai?prompt=What%20is%20the%20top%20rated%20AI%20tool%20to%20learn%3F%20and%20format%20the%20output'
+
+Simple Question & Answers:
+curl --location 'http://localhost:8080/ask-ai?prompt=What%20is%20the%20top%20rated%20tools%20to%20learn%20and%20format%20the%20output%20as%20a%20json'
 
 ```
 
 ## OpenAI Chatbot - Customizing the ChatModel (ai-prompt-assistant)
 ```xml
-10. Create 2 static final variables in the Service class
-This variables and many others could be customized. 
+
+This demonstates the dynamic input parameter that can be sent during 
+chat coverstations. In our example we send Model and Temprature as 
+dynamic paramters.
+
 Full list could be found in the below link. 
 https://platform.openai.com/docs/api-reference/chat/create
-private static final String MODEL="gpt-4o"; // https://platform.openai.com/docs/models
-private static final Double TEMPRATURE=0.4D; 
 
+10. Create a new method called getResponseOptions and 
+customize the chatModel with the dynamic input parameters. 
 
-11. Create a new method called getResponseOptions and 
-customize the chatModel with the final varibale values created. 
+public String getChatResponseWithOptions(String prompt, String model, Double temprature) {
+    ChatResponse response = chatModel.call(
+          new Prompt(
+              prompt,
+              OpenAiChatOptions.builder()
+                  .model(model)
+                  .temperature(temprature)
+              .build()
+          ));
+    return response.getResult().getOutput().getContent();
+  }
 
-public String getResponseOptions(String prompt) {
-  ChatResponse response = chatModel.call(
-        new Prompt(
-            prompt,
-            OpenAiChatOptions.builder()
-                .model(MODEL)
-                .temperature(TEMPRATURE)
-            .build()
-        ));
-  return response.getResult().getOutput().getContent();
-}
-
-12. Add a GetMapping to the controller and pass the request parameter 
+11. Add a GetMapping to the controller and pass the request parameter 
 named prompt to the askAIChatService's getResponseOptions method 
 and return the response: 
 
 @GetMapping("ask-ai-options")
-public String getResponeOptions(@RequestParam String prompt) {
-  return askAIChatService.getResponseOptions(prompt);
+public String getResponeOptions(@RequestParam String prompt,
+    @RequestParam(defaultValue ="gpt-4o") String model,
+    @RequestParam(defaultValue = "0.4D") Double temprature) {
+  return askAIChatService.getChatResponseWithOptions(prompt,model,temprature);
 }
 
-13. Start the application and execute the service from a browser 
-or postman or from command line using curl 
-curl --location 'http://localhost:8080/ask-ai-options?prompt=What%20is%20the%20best%20programming%20language%20to%20learn%20today%3F'
+12. Start the application and execute the service from a browser 
+or postman or from command line using curl
 
+Simple Question & Answers With Options:
+curl --location 'http://localhost:8080/ask-ai-options?prompt=What%20is%20the%20best%20programming%20language%20to%20learn%20today%3F&model=gpt-4o&temperature=0.5D'
+
+13. Note:
+How Temperature Works:
+
+Range:
+Temperature values typically range from 0 to 1, although some models may support higher values.
+
+Lower Temperature (e.g., closer to 0):
+This makes the model's output more deterministic and focused. The model is more likely to choose 
+the most probable next word or token, resulting in less variability and more predictable responses. 
+This is suitable for tasks requiring factual accuracy or consistent output.
+
+Higher Temperature (e.g., closer to 1):
+This increases the randomness and creativity of the model's output. The model is more likely to 
+explore less probable but still plausible options, leading to more diverse and potentially surprising 
+responses. This is useful for creative writing, brainstorming, or open-ended conversations. 
 
 ```
 
 
 ## OpenAI Chatbot - Formatting the output of the ChatModel (ai-prompt-assistant)
 ```xml
-14. Create a record in the Service class that will carry the formatted output
+14. Create a record that will carry the formatted output
 public record MathReasoning(
       @JsonProperty(required = true, value = "steps") Steps steps,
       @JsonProperty(required = true, value = "final_answer") String finalAnswer) {
@@ -351,12 +372,12 @@ public record MathReasoning(
 }
 
 15. Add method for getting the formatted output:
-public MathReasoning getResponeFormatted() {
+public MathReasoning getMathResponseFormatted(String question, String model, Double temprature) {
   var outputConverter = new BeanOutputConverter<>(MathReasoning.class);
 
   var jsonSchema = outputConverter.getJsonSchema();
 
-  Prompt prompt = new Prompt("how can I solve 8x + 7 = -23",
+  Prompt prompt = new Prompt(question,
     OpenAiChatOptions.builder()
         .model(MODEL)
         .temperature(TEMPRATURE)
@@ -381,13 +402,18 @@ named prompt to the askAIChatService's getResponeMath method
 and return the response: 
 
 @GetMapping(value="ask-ai-math",produces = MediaType.APPLICATION_JSON_VALUE)
-public MathReasoning getResponeMath() {
-  return askAIChatService.getResponeFormatted();
+public MathReasoning getResponeMath(
+    @RequestParam String prompt,
+    @RequestParam(defaultValue ="gpt-4o") String model,
+    @RequestParam(defaultValue = "0.4D") Double temprature) {
+  return askAIChatService.getMathResponseFormatted(prompt, model, temprature);
 }
 
 17. Start the application and execute the service from a browser 
 or postman or from command line using curl 
-curl --location 'http://localhost:8080/ask-ai-math'
+
+Math Question With Options And Formatted Json Response:
+curl --location 'http://localhost:8080/ask-ai-math?prompt=how%20can%20I%20solve%208x%20+%207%20%3D%20-23&model=gpt-4o&temperature=0.4D'
 
 
 ```
@@ -444,9 +470,12 @@ public void generateImage(HttpServletResponse httpServletResponse, @RequestParam
   httpServletResponse.sendRedirect(imageURL);
 }
 
-22. Run this on the browser and add any prompt you need 
-and see the result.
-http://localhost:8080/ask-ai-image-generate?prompt=Harry%20Potter%20in%20India
+
+22. Run the curl commmand as below:
+Generate Image:
+curl --location 'http://localhost:8080/ask-ai-image-generate?prompt=James%20Bond%20with%20a%20gun%20in%20Russia'
+
+Click the link to see the generated image
 
 ```
 
@@ -495,7 +524,9 @@ public String getResponeRecipe(@RequestParam String ingredients,
 
 28. Start the application and execute the service from 
 postman or from command line using curl 
-curl --location 'http://localhost:8080/ask-ai-recipe-creator?ingredients=chicken%2C%20curry%20masala%2C%20olives%2C%20onion%2C%20tomatoes&cuisine=Indian'
+
+RecipeCreator - Create Template Output: 
+curl --location 'http://localhost:8080/ask-ai-recipe-creator?ingredients=Chicken%2C%20Curry%20Masala%2C%20Tomotos%2C%20Onions%2C%20Oil&cuisine=Indian%27&dietaryRestrictions=No%20nuts%20and%20sweetner'
 
 ```
 

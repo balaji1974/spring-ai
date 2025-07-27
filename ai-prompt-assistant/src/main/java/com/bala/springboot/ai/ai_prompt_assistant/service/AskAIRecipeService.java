@@ -28,6 +28,7 @@ public class AskAIRecipeService {
 				"dietaryRestrictions", dietaryRestrictions
 				);
 		Prompt prompt=promptTemplate.create(params);
+		
 		return chatModel.call(prompt).getResult().getOutput().getContent();
 		
 	}
