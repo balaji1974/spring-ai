@@ -10,6 +10,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class AskAIImageService {
 	
+	/**
+	 * Already covered separately in AI Image Generator
+	 * Refer to that project
+	 */
+	
 	@Autowired
 	OpenAiImageModel openAiImageModel;
 	

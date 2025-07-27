@@ -9,7 +9,7 @@ import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.bala.springboot.ai.ai_prompt_assistant.util.MathReasoning;
 
 @Service
 public class AskAIChatService {
@@ -17,55 +17,39 @@ public class AskAIChatService {
 	@Autowired
 	ChatModel chatModel;
 	
-	private static final String MODEL="gpt-4o";
-	private static final Double TEMPRATURE=0.4D;
-	
-	public record MathReasoning(
-		  @JsonProperty(required = true, value = "steps") Steps steps,
-		  @JsonProperty(required = true, value = "final_answer") String finalAnswer) {
-
-		record Steps(
-				@JsonProperty(required = true, value = "items") Items[] items) {
-	
-			record Items(
-					@JsonProperty(required = true, value = "explanation") String explanation,
-					@JsonProperty(required = true, value = "output") String output) {}
-		}
-	}
 	
 	
-	public String getResponse(String prompt) {
+	public String getChatResponse(String prompt) {
 		return chatModel.call(prompt);
 	}
 	
-
-	public String getResponseOptions(String prompt) {
+	public String getChatResponseWithOptions(String prompt, String model, Double temprature) {
 		ChatResponse response = chatModel.call(
 			    new Prompt(
 			        prompt,
 			        OpenAiChatOptions.builder()
-			            .model(MODEL)
-			            .temperature(TEMPRATURE)
+			            .model(model)
+			            .temperature(temprature)
 			        .build()
 			    ));
 		return response.getResult().getOutput().getContent();
 	}
 	
-	public MathReasoning getResponeFormatted() {
+	public MathReasoning getMathResponseFormatted(String question, String model, Double temprature) {
 		var outputConverter = new BeanOutputConverter<>(MathReasoning.class);
 
 		var jsonSchema = outputConverter.getJsonSchema();
 
-		Prompt prompt = new Prompt("how can I solve 8x + 7 = -23",
+		Prompt prompt = new Prompt(question,
 		  OpenAiChatOptions.builder()
-		      .model(MODEL)
-		      .temperature(TEMPRATURE)
+		      .model(model)
+		      .temperature(temprature)
 		      .responseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, jsonSchema))
 		      .build());
 
 		ChatResponse response = chatModel.call(prompt);
 		String content = response.getResult().getOutput().getContent();
-
+		
 		MathReasoning mathReasoning = outputConverter.convert(content);
 		return mathReasoning;
 	}
