@@ -2127,7 +2127,7 @@ curl --location 'http://localhost:8080/solve' \
     "model" : "MISTRAL"
 }'
 
-SolveEquation - Using Deepseek R1:
+SolveEquation - Using Deepseek R1: 
 curl --location 'http://localhost:8080/solve' \
 --header 'Content-Type: application/json' \
 --data '{
