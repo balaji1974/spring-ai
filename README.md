@@ -155,16 +155,23 @@ https://docs.spring.io/spring-ai/reference/api/chat/comparison.html
 ## OpenAI Image generation (ai-image-generator)
 ```xml
 
-@Service -> ImageModel is the main interface used for generating images 
+@Service:
+ImageModel is the main interface used for generating images 
 and it is called in the service layer
 
-@RestController() -> This opens up an URL http://localhost:8080/image/generate
+@RestController():
+This opens up an URL http://localhost:8080/image/generate
 to which you can submit your image generation prompt 
 
 Run the service and call the url like this example below: 
-curl -X GET "http://localhost:8080/image/generate?prompt=Monkey%20playing%20cricket"
+Image Generator (Sample 1 - with default Parameters):
+curl --location 'http://localhost:8080/image/generate?prompt=Mountain%20background%20for%20PC'
 
-and you will receive a response which can be run on a browser to check the generated image 
+Image Generator (Sample 2 - with Parameters):
+curl --location 'http://localhost:8080/image/generate?prompt=Harry%20Potter%20in%20India&modelName=dall-e-3&noOfImages=1&imageHeight=1024&imageWidth=1024'
+
+You will receive a response as link which can be click and send to server 
+to check the generated image or simply copy and run it on a browser
 
 Full details of this example can be found here:
 https://dzone.com/articles/spring-ai-generate-images-openai-dalle?edition=958905
