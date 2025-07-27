@@ -19,10 +19,10 @@ public class ImageGenerationController {
 
   @GetMapping("/generate")
   public ResponseEntity<String> generateImage(@RequestParam String prompt,
-		  @RequestParam(required=false)  String modelName,
-		  @RequestParam(required=false)  Integer noOfImages,
-		  @RequestParam(required=false)  Integer imageHeight,
-		  @RequestParam(required=false)  Integer imageWidth
+		  @RequestParam(defaultValue = "dall-e-2")  String modelName,
+		  @RequestParam(defaultValue = "1")  Integer noOfImages,
+		  @RequestParam(defaultValue = "512")  Integer imageHeight,
+		  @RequestParam(defaultValue = "512")  Integer imageWidth
 		  
 		  ) {
   	return ResponseEntity.ok(imageService.generateImage(prompt,modelName,noOfImages,

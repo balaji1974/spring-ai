@@ -20,11 +20,6 @@ public class ImageGenerationService {
 	   * Additional validation to check for only valid input parameters 
 	   * This can be done later
 	   */
-	  if(modelName==null) modelName="dall-e-2"; // defaults
-	  String quality="hd"; // supported only by dall-e-3
-	  if(noOfImages==null) noOfImages=1; // defaults
-	  if(imageHeight==null) imageHeight=512; // defaults
-	  if(imageWidth==null) imageWidth=512; // defaults
 	  
 	  OpenAiImageOptions imageOptions=OpenAiImageOptions.builder()
 							.model(modelName)
@@ -35,7 +30,7 @@ public class ImageGenerationService {
 	  
 	  // supported only by dall-e-3
 	  if(modelName=="dall-e-3")
-		  imageOptions.setQuality(quality); 
+		  imageOptions.setQuality("hd"); 
 						  
 	  ImagePrompt imagePrompt = new ImagePrompt(prompt,imageOptions);
 	  ImageResponse imageResponse = imageModel.call(imagePrompt);
