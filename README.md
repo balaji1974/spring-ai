@@ -1674,13 +1674,14 @@ using Anthropic (Claude)
 
 8. Run the application to test the two Controllers: 
 
-curl --location 'http://localhost:8080/claude'
+RunWithClaude:
+curl --location 'http://localhost:8080/claude?question=Tell%20me%20an%20interesting%20fact%20about%20OpenAI'
 
-curl --location 'http://localhost:8080/openai'
+RunWithOpenAI:
+curl --location 'http://localhost:8080/openai?question=Tell%20me%20an%20interesting%20fact%20about%20Anthropic'
 
-Each request will return an interesting fact about the respective company, 
-demonstrating that we're successfully communicating with two different LLMs 
-in the same application.
+Each request will return an interesting fact demonstrating that we're 
+successfully communicating with two different LLMs in the same application.
 
 ```
 
@@ -2207,7 +2208,8 @@ curl --location 'http://localhost:8080/solve' \
 ```xml
 
 We can use Ollama, an open-source tool, to run LLMs on our local machines. 
-It supports running GGUF format models from Hugging Face.
+It supports running GGUF format models (specially designed to store inference 
+models and perform well on consumer-grade computer hardware) from Hugging Face.
 
 Ollama now supports all GGUF models from Hugging Face, 
 allowing access to over 45,000 community-created models through Spring AI's 

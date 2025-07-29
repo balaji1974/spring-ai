@@ -3,6 +3,7 @@ package com.bala.springboot.ai.ai_multi_model.controller;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -15,9 +16,9 @@ public class AnthropicChatController {
     }
 
     @GetMapping("/claude")
-    public String claude() {
+    public String claude(@RequestParam String question) throws Exception {
         return chatClient.prompt()
-                .user("Tell me an interesting fact about Anthropic")
+                .user(question)
                 .call()
                 .content();
     }
