@@ -2034,7 +2034,7 @@ getAllCourses -> Which will list all courses available
 getCourse -> Which will fetch a course based on the title 
 
 8. Next we create a config class where we register our bean 
-which will list our tools using ToolsCallBack. 
+and list our tools using ToolsCallBack. 
 ToolsConfig.java
 
 9. Finally run the server to check if our tools are registered properly.
@@ -2100,11 +2100,12 @@ We also create two methods getAllCourses and getDetailsOfACourse with HTTP end p
 that will use the tools already injected as default tool callback in the constructor. 
 
 7. Finally run the client application and test it: 
-curl --location 'http://localhost:8080/tool1'
-curl --location 'http://localhost:8080/tool2' 
 
-Note: Hardcoded PromptTemplate values will be dropped and dynamic data 
-will be passed in production applications. 
+Tool1 - Get the List of all available courses:
+curl --location 'http://localhost:8080/tool1?question=Get%20the%20list%20of%20all%20available%20courses'
+
+Tool2 - Get the List of all specific courses:
+curl --location 'http://localhost:8080/tool2?question=Get%20me%20Python%20course%20details'
 
 ```
 

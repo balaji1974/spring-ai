@@ -6,6 +6,7 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -28,11 +29,9 @@ public class ToolUsageController {
 	}
 	
 	@GetMapping("/tool1")
-    String getAllCourses() {
+    String getAllCourses(@RequestParam() String question) {
 
-        PromptTemplate pt = new PromptTemplate("""
-                Get the list of all available courses.
-                """);
+        PromptTemplate pt = new PromptTemplate(question);
         Prompt p = pt.create();
         return this.chatClient.prompt(p)
                 .call()
@@ -40,11 +39,9 @@ public class ToolUsageController {
     }
 	
 	@GetMapping("/tool2")
-    String getDetailsOfACourse() {
+    String getDetailsOfACourse(@RequestParam() String question) {
 
-        PromptTemplate pt = new PromptTemplate("""
-                Get me Python course details
-                """);
+        PromptTemplate pt = new PromptTemplate(question);
         Prompt p = pt.create();
         return this.chatClient.prompt(p)
                 .call()
