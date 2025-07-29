@@ -49,7 +49,7 @@ public class AIController {
 	    .prompt(weatherRequest.question())
 	    .tools(toolCallback)
 	    .call()
-	    .content();
+	    .content().concat("\n\n**Note: This is a random generated weather from our internal tools");
 
 	}
 	
@@ -59,7 +59,7 @@ public class AIController {
 	    .prompt(weatherRequest.question())
 	    .tools("currentWeather")
 	    .call()
-	    .content();
+	    .content().concat("\n\n**Note: This is a random generated weather from our internal tools");
 
 	}
 

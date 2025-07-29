@@ -1333,8 +1333,32 @@ Verify it with the database to check the correctness
 
 ```
 
-## Inject Custom Functions - (ai-inject-custom-function)
+## Inject Custom Functions (Tools) - (ai-inject-custom-function)
 ```xml 
+Tool calling (also known as function calling - now deprecated) is a common pattern in 
+AI applications allowing a model to interact with a set of APIs, or tools, 
+augmenting its capabilities.
+
+Tools are mainly used for:
+
+Information Retrieval: Tools in this category can be used to retrieve information from 
+external sources, such as a database, a web service, a file system, or a web search engine. 
+The goal is to augment the knowledge of the model, allowing it to answer questions that it 
+would not be able to answer otherwise. 
+
+As such, they can be used in Retrieval Augmented Generation (RAG) scenarios. 
+For example, a tool can be used to retrieve the current weather for a given location, 
+to retrieve the latest news articles, or to query a database for a specific record.
+
+Taking Action: Tools in this category can be used to take action in a software system, 
+such as sending an email, creating a new record in a database, submitting a form, 
+or triggering a workflow. The goal is to automate tasks that would otherwise require 
+human intervention or explicit programming. 
+For example, a tool can be used to book a flight for a customer interacting with a chatbot, 
+to fill out a form on a web page, or to implement a Java class based on an automated test 
+(TDD) in a code generation scenario.
+
+
 1. Spring Initilizer
 Go to spring initilizer page https://start.spring.io/ 
 and add the following dependencies: 
@@ -1394,32 +1418,35 @@ or BiFunction bean as a tool.
 
 
 8. The Controller has 3 different ways of calling a custom functions:
-areaOfRectangle -> This is used to directly call the function along with prompt 
-which is deprecated and not be used in future. 
-getTemperature -> This is used to register a tool call back that can be used 
-to create a ChatClient
-getTemperatureWithTools -> This is used to directly register a tool amd use it 
-within our application
+
+areaOfRectangle: This is used to directly call the function using Prompt 
+which is deprecated and not to be used in future. This returns the actual respone 
+returned from the AI model which is the Generation class.
+
+getTemperature: This is used within a FunctionToolCallback that has a method 
+called inputType and returns a ChatClient. The result is wrapped around the 
+WeatherResponse class.
+
+getTemperatureWithTools: This is used to directly register a tool using
+the tools function in the ClientClient class (most ideal way. The result is wrapped 
+around the WeatherResponse class.
 
 All 3 methods are used in different ways to register a function and call it,
 within the boundaries of AI models. 
 
 
 9. Run the application - 3 differnt ways:
-Way 1: 
-curl --location 'http://localhost:8080/area-rectangle?
-message=%22What%20is%20the%20area%20of%20rectangle%20with%20height%2020%20and%20base%203%22' \
---data ''
+AreaOfRectangle: 
+curl --location 'http://localhost:8080/area-rectangle?message=What%20is%20the%20area%20of%20the%20rectangle%20with%20height%2030%20and%20base%2022'
 
-Way 2: 
+WhatIsTheWeather (Static):
 curl --location 'http://localhost:8080/weather' \
 --header 'Content-Type: application/json' \
 --data '{
-    "question": "What'\''s the weather like in Abu Dhabi?"
+    "question": "Riyadh"
 }'
 
-
-Way 3:
+WhatIsTheWeather (Dynamic):
 curl --location 'http://localhost:8080/weather-tools' \
 --header 'Content-Type: application/json' \
 --data '{
