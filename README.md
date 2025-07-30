@@ -1683,11 +1683,42 @@ curl --location 'http://localhost:8080/openai?question=Tell%20me%20an%20interest
 Each request will return an interesting fact demonstrating that we're 
 successfully communicating with two different LLMs in the same application.
 
+
+9. DynamicLLMAndModelSelectionController.java
+This is used for selecting the LLM provider and models dynamically at runtime.
+This is achived by intiziating both the supported chat clients in the constructor 
+and then dynamically selecting the right LLM by injecting the llmSelector 
+parameter to choose the LLM that needs to be used. 
+The supported values for the llmSelector parameter are 'openai' and 'anthropic'
+It also has a modelSelector that could be injected to select the right model 
+with the given LLM space. 
+Run this controller with the below curl command: 
+
+10. Run the application to test the Controller: 
+Dynamic LLM Selector (OpenAI):
+curl --location 'http://localhost:8080/llm-selector?myPrompt=What%20is%20the%20most%20popular%20programming%20language%20today%3F&llmSelector=openai'
+
+Dynamic LLM Selector (Anthropic):
+curl --location 'http://localhost:8080/llm-selector?myPrompt=What%20is%20the%20most%20popular%20programming%20language%20today%3F&llmSelector=anthropic'
+
+Dynamic LLM And Model Selector (OpenAI):
+curl --location 'http://localhost:8080/llm-and-model-selector?myPrompt=What%20is%20the%20most%20popular%20programming%20language%20today%3F&llmSelector=openai&modelSelector=gpt-4o-mini'
+
+Dynamic LLM And Model Selector (Anthropic):
+curl --location 'http://localhost:8080/llm-and-model-selector?myPrompt=What%20is%20the%20most%20popular%20programming%20language%20today%3F&llmSelector=anthropic&modelSelector=claude-3-7-sonnet-latest'
+
 ```
 
 ## AI Prompt Engineering (ai-prompt-engineering)
 ```xml
-
+What is prompt engineering:
+The process of crafting specific instructions, also known as prompts, 
+to guide AI models, particularly large language models (LLMs), 
+in generating desired outputs. 
+It's a way of communicating with AI to elicit the most relevant and 
+accurate responses for a given task. Essentially, it's the art and science 
+of designing prompts to steer the AI towards the specific result you have 
+in mind. 
 
 https://www.kaggle.com/whitepaper-prompt-engineering
 
@@ -1745,25 +1776,7 @@ Here two beans are injected as openAIChatClient and anthropicAIChatClient
 
 7. Controller classes:
 
-7.0 LLMSelectionController.java
-This is used for selecting the LLM provider dynamically at runtime.
-This is achived by intiziating both the supported chat clients in the constructor 
-and then dynamically selecting the right client by injecting the modelSelector 
-parameter to choose the client that needs to be used. 
-The supported values for the modelSelector parameter are 'openai' and 'anthropic'
-Run this controller with the below curl command: 
 
-Dynamic LLM Selector (OpenAI):
-curl --location 'http://localhost:8080/llm-selector?myPrompt=What%20is%20the%20most%20popular%20programming%20language%20today%3F&llmSelector=openai'
-
-Dynamic LLM Selector (Anthropic):
-curl --location 'http://localhost:8080/llm-selector?myPrompt=What%20is%20the%20most%20popular%20programming%20language%20today%3F&llmSelector=anthropic'
-
-Dynamic LLM And Model Selector (OpenAI):
-curl --location 'http://localhost:8080/llm-and-model-selector?myPrompt=What%20is%20the%20most%20popular%20programming%20language%20today%3F&llmSelector=openai&modelSelector=gpt-4o-mini'
-
-Dynamic LLM And Model Selector (Anthropic):
-curl --location 'http://localhost:8080/llm-and-model-selector?myPrompt=What%20is%20the%20most%20popular%20programming%20language%20today%3F&llmSelector=anthropic&modelSelector=claude-3-7-sonnet-latest'
 
 7.1. OpenAiChatController.java
 This is used for creating the ChatClient

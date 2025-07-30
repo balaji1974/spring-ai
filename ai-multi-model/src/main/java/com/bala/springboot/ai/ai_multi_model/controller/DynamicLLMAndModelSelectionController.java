@@ -1,4 +1,4 @@
-package com.bala.springboot.ai.ai_prompt_engineering.controller;
+package com.bala.springboot.ai.ai_multi_model.controller;
 
 import java.util.Arrays;
 import java.util.HashSet;
