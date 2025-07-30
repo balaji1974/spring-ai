@@ -1688,6 +1688,9 @@ successfully communicating with two different LLMs in the same application.
 ## AI Prompt Engineering (ai-prompt-engineering)
 ```xml
 
+
+https://www.kaggle.com/whitepaper-prompt-engineering
+
 1. Spring Initilizer
 Go to spring initilizer page https://start.spring.io/ 
 and add the following dependencies: 
@@ -1741,6 +1744,26 @@ Here two beans are injected as openAIChatClient and anthropicAIChatClient
 (manually configuring our ChatClient)
 
 7. Controller classes:
+
+7.0 LLMSelectionController.java
+This is used for selecting the LLM provider dynamically at runtime.
+This is achived by intiziating both the supported chat clients in the constructor 
+and then dynamically selecting the right client by injecting the modelSelector 
+parameter to choose the client that needs to be used. 
+The supported values for the modelSelector parameter are 'openai' and 'anthropic'
+Run this controller with the below curl command: 
+
+Dynamic LLM Selector (OpenAI):
+curl --location 'http://localhost:8080/llm-selector?myPrompt=What%20is%20the%20most%20popular%20programming%20language%20today%3F&llmSelector=openai'
+
+Dynamic LLM Selector (Anthropic):
+curl --location 'http://localhost:8080/llm-selector?myPrompt=What%20is%20the%20most%20popular%20programming%20language%20today%3F&llmSelector=anthropic'
+
+Dynamic LLM And Model Selector (OpenAI):
+curl --location 'http://localhost:8080/llm-and-model-selector?myPrompt=What%20is%20the%20most%20popular%20programming%20language%20today%3F&llmSelector=openai&modelSelector=gpt-4o-mini'
+
+Dynamic LLM And Model Selector (Anthropic):
+curl --location 'http://localhost:8080/llm-and-model-selector?myPrompt=What%20is%20the%20most%20popular%20programming%20language%20today%3F&llmSelector=anthropic&modelSelector=claude-3-7-sonnet-latest'
 
 7.1. OpenAiChatController.java
 This is used for creating the ChatClient
