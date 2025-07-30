@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class LLMSelectionController {
+public class DynamicLLMAndModelSelectionController {
 
 	private final ChatClient openAIChatClient;
     private final ChatClient anthropicChatClient;
@@ -28,7 +28,7 @@ public class LLMSelectionController {
     		"claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"));
     
 	
-	public LLMSelectionController(@Qualifier("openAIChatClient") ChatClient openAIChatClient,
+	public DynamicLLMAndModelSelectionController(@Qualifier("openAIChatClient") ChatClient openAIChatClient,
             @Qualifier("anthropicChatClient") ChatClient anthropicChatClient) {
 		this.openAIChatClient = openAIChatClient;
 		this.anthropicChatClient = anthropicChatClient;
