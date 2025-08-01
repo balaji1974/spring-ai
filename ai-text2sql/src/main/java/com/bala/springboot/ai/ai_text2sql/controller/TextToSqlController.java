@@ -16,19 +16,6 @@ public class TextToSqlController {
 
   private final ChatClient chatClient;
 
-  private static final String USER_PROMPT_TEMPLATE = """
-      You are a Postgres expert. Please generate SQL statements to answer user's query. 
-      
-      The table name is netflix_shows. Column names and data types are shown as below: 
-      show_id, text; type, text; title, text; director, text; cast_members, text; country, text; 
-      date_added, date; release_year, int4; rating, text; duration, text; 
-      listed_in, text; description, text.
-      
-      Output the SQL only. Don't use Markdown format and output the query in a single line.
-      
-      {user_input}
-      """;
-
   public TextToSqlController(ChatClient.Builder builder) {
     this.chatClient = builder.defaultAdvisors(new SimpleLoggerAdvisor()).build();
   }
@@ -36,8 +23,8 @@ public class TextToSqlController {
   @PostMapping
   public TextToSqlResponse textToSql(@RequestBody TextToSqlRequest request) {
     String sql = chatClient.prompt()
-        .user(userSpec -> userSpec.text(USER_PROMPT_TEMPLATE)
-            .param("user_input", request.input()))
+        .user(userSpec -> userSpec.text(request.context())
+            .param("user_input", request.userPrompt()))
         .call()
         .content();
     return new TextToSqlResponse(sql);

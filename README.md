@@ -1116,6 +1116,13 @@ into the vector database but please note that the possibilies are limitless
 
 ## Text to SQL - Static DDL  (ai-text2sql)
 ```xml
+This convert the given metadata schema to an sql query based on 
+the database that is given as part of the prompt.
+
+The schema of the database table is give as part of the context 
+and the database name is given as part of the user prompt 
+to generate the sql query
+
 
 1. Spring Initilizer
 Go to spring initilizer page https://start.spring.io/ 
@@ -1181,10 +1188,13 @@ Check the textToSql method for details in the TextToSqlController.java file.
 
 11. Run the application 
 Run the application and excute a curl command to see the respone:
+
+TextToSQL(Sample1):
 curl --location 'http://localhost:8080/texttosql' \
 --header 'Content-Type: application/json' \
 --data '{
-    "input": "How many shows were produced in 2020?"
+    "context" : "You are a Postgres expert. Please generate SQL statements to answer user'\''s query. \n \n  The table name is netflix_shows. Column names and data types are shown as below: \n show_id, text; type, text; title, text; director, text; cast_members, text; country, text; date_added, date; release_year,int4; rating, text; duration, text; listed_in, text; description, text. \n \n  Output the SQL only. Don'\''t use Markdown format and output the query in a single line. \n \n  {user_input}", 
+    "userPrompt":"How many shows were produced in 2020?"
 }'
 
 This will result in a response containing the SQL query like below:
@@ -1192,13 +1202,31 @@ This will result in a response containing the SQL query like below:
     "sql": "SELECT COUNT(*) FROM netflix_shows WHERE release_year = 2020;"
 }
 
+TextToSQL(Sample2):
+curl --location 'http://localhost:8080/texttosql' \
+--header 'Content-Type: application/json' \
+--data '{
+    "context" : "You are a Postgres expert. Please generate SQL statements to answer user'\''s query. \n \n  The table name is netflix_shows. Column names and data types are shown as below: \n show_id, text; type, text; title, text; director, text; cast_members, text; country, text; date_added, date; release_year,int4; rating, text; duration, text; listed_in, text; description, text. \n \n  Output the SQL only. Don'\''t use Markdown format and output the query in a single line. \n \n  {user_input}", 
+    "userPrompt":"Can you fetch me all shows directed by Rajiv Chilaka"
+}'
+
+This will result in a response containing the SQL query like below:
+{
+    "sql": "SELECT * FROM netflix_shows WHERE director = 'Rajiv Chilaka';"
+}
+
+
 Verify it with the netflix.sql file to check the correctness 
 (this could be inserted into a live database and checked for results)
 
 The command to do this would be:
 docker pull postgres
-docker run --name ai-text2sql -e POSTGRES_PASSWORD=secret -e POSTGRES_USER=myuser -e POSTGRES_DB=mydatabase -p 5432:5432 -d postgres   
+docker run --name text-to-sql -e POSTGRES_PASSWORD=secret -e POSTGRES_USER=myuser -e POSTGRES_DB=mydatabase -p 5432:5432 -d postgres   
 docker exec -i <our running container name> psql -U myuser -d mydatabase < <path to our sql file>/netflix.sql
+
+Eg. 
+docker exec -i 50377aa11d70e787b49eadfe4929f3a541a7fccb2127bae3e88d78ec09571c2a psql -U myuser -d mydatabase < /Users/balaji/eclipse-workspace/spring-ai/ai-text2sql/netflix.sql
+
 
 ```
 
