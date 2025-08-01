@@ -5,6 +5,7 @@ import org.springframework.ai.anthropic.api.AnthropicApi.ThinkingType;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -16,19 +17,19 @@ public class AnthropicChatController {
         this.chatClient = chatClient;
     }
     
-    String myPrompt="Classify movie reviews as POSITIVE, NEUTRAL or NEGATIVE. "
-    		+ " Review: 'Her' is a disturbing study revealing the direction"
-    		+ " humanity is headed if AI is allowed to keep evolving,"
-    		+ " unchecked. I wish there were more movies like this masterpiece."
-    		+ " Sentiment:";
-
+    /* To do - To validate all input parameter */
     @GetMapping("/claude-chatoptions")
-    public String claude() {
+    public String claude(
+    		@RequestParam(defaultValue="how can I solve 8x + 7 = -23") String myPrompt,
+    		@RequestParam(defaultValue="claude-3-7-sonnet-latest") String model,
+    		@RequestParam(defaultValue="1.0") Double temprature,
+    		@RequestParam(defaultValue="1000") Integer maxToken
+    		) {
     	AnthropicChatOptions anthropicOptions = AnthropicChatOptions.builder()
     			/*
     			 * Anthropic model to use
     			 */
-    	        .model("claude-3-7-sonnet-latest")
+    	        .model(model)
     	        
     	        /* 
     	         * Temperature controls the randomness or "creativity" of the model's response. 
@@ -38,7 +39,7 @@ public class AnthropicChatController {
     	         * Higher values (0.8-1.0): More creative, varied, and potentially surprising responses. 
     	         * Better for creative writing, brainstorming, or generating diverse options.
     	         */
-    	        .temperature(1.0)  // Not less than 1.0 for thinking enabled
+    	        .temperature(temprature)  // Not less than 1.0 for thinking enabled
     	        
     	        /*
     	         * Only sample from the top K options for each subsequent token.
@@ -52,7 +53,7 @@ public class AnthropicChatController {
 	   	         * Medium values (50-500): For paragraphs or short explanations.
 	   	         * High values (1000+): For long-form content, stories, or complex explanations.
 	   	         */
-    	        .maxTokens(2000) // Not less than the max budget token used in thinking which is 1024 in our case
+    	        .maxTokens(maxToken) // Not less than the max budget token used in thinking which is 1024 in our case
     	        
 				/*
 				 * With the "think" tool, we're giving Claude the ability to include an additional 

@@ -4,7 +4,10 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.bala.springboot.ai.ai_prompt_engineering.configuration.util.ContextPromptRecord;
 
 
 @RestController
@@ -18,15 +21,10 @@ public class AutomaticPromptController {
 	
     
     @GetMapping("/openai-automaticprompting")
-    public String pt_automatic_prompt_engineering() {
+    public String pt_automatic_prompt_engineering(@RequestBody ContextPromptRecord contextPromptRecord) {
         // Generate variants of the same request
         String orderVariants = chatClient
-                .prompt("""
-                        We have a band merchandise t-shirt webshop, and to train a
-                        chatbot we need various ways to order: "One Metallica t-shirt
-                        size S". Generate 10 variants, with the same semantics but keep
-                        the same meaning.
-                        """)
+                .prompt(contextPromptRecord.prompt())
                 .options(ChatOptions.builder()
                         .temperature(1.0)  // High temperature for creativity
                         .build())
@@ -36,14 +34,7 @@ public class AutomaticPromptController {
         // Evaluate and select the best variant
         String output = chatClient
                 .prompt()
-                .user(u -> u.text("""
-                        Please perform BLEU (Bilingual Evaluation Understudy) evaluation on the following variants:
-                        ----
-                        {variants}
-                        ----
-
-                        Select the instruction candidate with the highest evaluation score.
-                        """).param("variants", orderVariants))
+                .user(u -> u.text(contextPromptRecord.context()).param("variants", orderVariants))
                 .call()
                 .content();
         

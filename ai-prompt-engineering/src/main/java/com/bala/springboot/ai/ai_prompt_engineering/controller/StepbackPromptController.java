@@ -4,7 +4,10 @@ import org.springframework.ai.anthropic.AnthropicChatOptions;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.bala.springboot.ai.ai_prompt_engineering.configuration.util.StepbackPromptRecord;
 
 
 @RestController
@@ -28,26 +31,17 @@ public class StepbackPromptController {
     }
     
     @GetMapping("/openai-stepbackprompting")
-    public String pt_step_back_prompting() {
+    public String pt_step_back_prompting(@RequestBody StepbackPromptRecord prompt) {
     	
         String stepBack = chatClient
-                .prompt("""
-                        Based on popular first-person shooter action games, what are
-                        5 fictional key settings that contribute to a challenging and
-                        engaging level storyline in a first-person shooter video game?
-                        """)
+        		.prompt(prompt.prompt1())
                 .call()
                 .content();
 
         // Then use those concepts in the main task
         String story = chatClient
                 .prompt()
-                .user(u -> u.text("""
-                        Write a one paragraph storyline for a new level of a first-
-                        person shooter video game that is challenging and engaging.
-
-                        Context: {step-back}
-                        """)
+                .user(u -> u.text(prompt.prompt2())
                         .param("step-back", stepBack))
                 .call()
                 .content();

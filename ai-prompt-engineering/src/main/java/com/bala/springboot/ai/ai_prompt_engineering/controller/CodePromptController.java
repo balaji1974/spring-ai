@@ -4,7 +4,10 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.bala.springboot.ai.ai_prompt_engineering.configuration.util.ContextPromptRecord;
 
 
 @RestController
@@ -18,13 +21,9 @@ public class CodePromptController {
 	
     
     @GetMapping("/openai-codeprompting")
-    public String pt_code_prompting_writing_code() {
+    public String pt_code_prompting_writing_code(@RequestBody String promptText) {
         String bashScript = chatClient
-                .prompt("""
-                        Write a code snippet in Bash, which asks for a folder name.
-                        Then it takes the contents of the folder and renames all the
-                        files inside by prepending the name draft to the file name.
-                        """)
+                .prompt(promptText)
                 .options(ChatOptions.builder()
                         .temperature(0.1)  // Low temperature for deterministic code
                         .build())
@@ -34,60 +33,24 @@ public class CodePromptController {
     }
 
     @GetMapping("/openai-explaincodeprompting")
-    public String pt_code_prompting_explaining_code() {
-        String code = """
-                #!/bin/bash
-                echo "Enter the folder name: "
-                read folder_name
-                if [ ! -d "$folder_name" ]; then
-                echo "Folder does not exist."
-                exit 1
-                fi
-                files=( "$folder_name"/* )
-                for file in "${files[@]}"; do
-                new_file_name="draft_$(basename "$file")"
-                mv "$file" "$new_file_name"
-                done
-                echo "Files renamed successfully."
-                """;
+    public String pt_code_prompting_explaining_code(@RequestBody ContextPromptRecord contextPromptRecord) {
+        String code = contextPromptRecord.prompt();
 
         String explanation = chatClient
                 .prompt()
-                .user(u -> u.text("""
-                        Explain to me the below Bash code:
-                        ```
-                        {code}
-                        ```
-                        """).param("code", code))
+                .user(u -> u.text(contextPromptRecord.context()).param("code", code))
                 .call()
                 .content();
         return explanation;
     }
 
     @GetMapping("/openai-translatecodeprompting")
-    public String pt_code_prompting_translating_code() {
-        String bashCode = """
-                #!/bin/bash
-                echo "Enter the folder name: "
-                read folder_name
-                if [ ! -d "$folder_name" ]; then
-                echo "Folder does not exist."
-                exit 1
-                fi
-                files=( "$folder_name"/* )
-                for file in "${files[@]}"; do
-                new_file_name="draft_$(basename "$file")"
-                mv "$file" "$new_file_name"
-                done
-                echo "Files renamed successfully."
-                """;
+    public String pt_code_prompting_translating_code(@RequestBody ContextPromptRecord contextPromptRecord) {
+        String bashCode = contextPromptRecord.prompt();
 
         String pythonCode = chatClient
                 .prompt()
-                .user(u -> u.text("""
-                        Translate the below Bash code to a Python snippet:                        
-                        {code}                        
-                        """).param("code", bashCode))
+                .user(u -> u.text(contextPromptRecord.context()).param("code", bashCode))
                 .call()
                 .content();
         return pythonCode;

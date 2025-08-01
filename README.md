@@ -1776,14 +1776,14 @@ Here two beans are injected as openAIChatClient and anthropicAIChatClient
 
 7. Controller classes:
 
-
-
 7.1. OpenAiChatController.java
 This is used for creating the ChatClient
 using OpenAI and general OpenAI prompt option parameters are 
 explained here.
 Run this controller with the below curl command: 
-curl --location 'http://localhost:8080/openai-chatoptions'
+
+OpenAIOptions:
+curl --location 'http://localhost:8080/openai-chatoptions?myPrompt=how%20can%20I%20solve%208x%20+%207%20%3D%20-73&model=gpt-4o&temprature=0.3&frequencyPenalty=0.4&presencePenalty=0.3&maxToken=350&topP=0.7&seed=42&outputFormat=JSON_SCHEMA'
 
 
 7.2. AnthropicChatController.java
@@ -1791,7 +1791,9 @@ This is used for creating the ChatClient
 using Anthropic (Claude) and general Anthropic prompt option parameters are 
 explained here.
 Run this controller with the below curl command:
-curl --location 'http://localhost:8080/claude-chatoptions'
+
+AnthropicAIOptions:
+curl --location 'http://localhost:8080/claude-chatoptions?myPrompt=Classify%20movie%20reviews%20as%20POSITIVE%2C%20NEUTRAL%20or%20NEGATIVE.%20Review%3A%20%27Her%27%20is%20a%20disturbing%20study%20revealing%20the%20direction%20humanity%20is%20headed%20if%20AI%20is%20allowed%20to%20keep%20evolving%2C%20unchecked.%20I%20wish%20there%20were%20more%20movies%20like%20this%20masterpiece.%20Sentiment%3A&model=claude-3-7-sonnet-latest&temprature=1.0&maxToken=2000'
 
 
 7.3. Zero-Shot Prompting
@@ -1806,7 +1808,9 @@ depending on task complexity and how well the instructions are formulated.
 
 Sample Controller: ZeroShotController.java
 Run this controller with the below curl command:
-curl --location 'http://localhost:8080/openai-zeroshotprompting'
+
+ZeroShotPrompt:
+curl --location 'http://localhost:8080/openai-zeroshotprompting?myPrompt=Classify%20movie%20reviews%20as%20POSITIVE%2C%20NEUTRAL%20or%20NEGATIVE.%20Review%3A%20%22Her%22%20is%20a%20disturbing%20study%20revealing%20the%20direction%20humanity%20is%20headed%20if%20AI%20is%20allowed%20to%20keep%20evolving%2C%20unchecked.%20I%20wish%20there%20were%20more%20movies%20like%20this%20masterpiece.%20Sentiment%3A'
 
 
 7.4. One-Shot & Few-Shot Prompting
@@ -1822,7 +1826,14 @@ more complex tasks or to illustrate different variations of correct outputs.
 
 Sample Controller: OneShotFewShotController.java
 Run this controller with the below curl command:
-curl --location 'http://localhost:8080/openai-oneshotfewshotprompting'
+
+OneFewShotPrompt:
+curl --location 'http://localhost:8080/openai-oneshotfewshotprompting' \
+--header 'Content-Type: application/json' \
+--data '{
+    "myPrompt" : "Parse a customer'\''s pizza order into valid JSON consisting of size, type and ingredients. I would like a large pizza, with the first half cheese and mozzarella.And the other tomato sauce, ham and pineapple." 
+}'
+
 
 
 7.5. System prompting
@@ -1839,8 +1850,23 @@ system prompts frame how all user prompts should be interpreted.
 
 Sample Controller: SystemPromptController.java
 Run this controller with the below curl commands:
-curl --location 'http://localhost:8080/openai-systemprompting1'
-curl --location 'http://localhost:8080/openai-systemprompting2'
+
+SystemPrompt(TextOutput):
+curl --location --request GET 'http://localhost:8080/openai-systemprompting-text' \
+--header 'Content-Type: application/json' \
+--data '{
+    "systemPrompt":"Classify movie reviews as positive, neutral or negative. Only return the label in uppercase.",
+    "userPrompt": "Review: \"Her\" is a disturbing study revealing the direction humanity is headed if AI is allowed to keep evolving, unchecked. It'\''s so disturbing I couldn'\''t watch it. Sentiment:"
+}'
+
+SystemPrompt(JsonOutput):
+curl --location --request GET 'http://localhost:8080/openai-systemprompting-json' \
+--header 'Content-Type: application/json' \
+--data '{
+    "systemPrompt":"Classify movie reviews as positive, neutral or negative. Return valid JSON.",
+    "userPrompt": "Review: \"Her\" is a disturbing study revealing the direction humanity is headed if AI is allowed to keep evolving, unchecked. It'\''s so disturbing I couldn'\''t watch it. JSON Response:"
+}'
+
 
 
 7.6 Role prompting
@@ -1856,8 +1882,23 @@ or stylistic character (e.g., "Explain like you're Shakespeare").
 
 Sample Controller: RolePromptController.java
 Run this controller with the below curl commands:
-curl --location 'http://localhost:8080/openai-roleprompting1'
-curl --location 'http://localhost:8080/openai-roleprompting2'
+
+RolePrompt:
+curl --location --request GET 'http://localhost:8080/openai-roleprompting' \
+--header 'Content-Type: application/json' \
+--data '{
+    "systemPrompt":"I want you to act as a travel guide. I will write to you about my location and you will suggest 3 places to visit near me. In some cases, I will also give you the type of places I will visit.",
+    "userPrompt": "My suggestion: \"I am in Amsterdam and I want to visit only museums.\" Travel Suggestions:"
+}'
+
+RolePromptHumour:
+curl --location --request GET 'http://localhost:8080/openai-roleprompting-humour' \
+--header 'Content-Type: application/json' \
+--data '{
+    "systemPrompt":"I want you to act as a travel guide. I will write to you about my location and you will suggest 3 places to visit near me in a humorous style.",
+    "userPrompt": "My suggestion: \"I am in Amsterdam and I want to visit only museums.\" Travel Suggestions:"
+}'
+
 
 
 7.7 Contextual Prompting
@@ -1872,7 +1913,15 @@ This leads to more accurate, relevant, and appropriately framed responses.
 
 Sample Controller: ContextPromptController.java
 Run this controller with the below curl commands:
-curl --location 'http://localhost:8080/openai-contextprompting'
+
+ContextPrompt:
+curl --location --request GET 'http://localhost:8080/openai-contextprompting' \
+--header 'Content-Type: application/json' \
+--data '{
+    "prompt":"Suggest 3 topics to write an article about with a few lines of description of what this article should contain. Context: {context}",
+    "context": "You are writing for a blog about retro 80'\''s movie releases"
+}'
+
 
 
 7.8 Step-back prompting
@@ -1887,7 +1936,15 @@ difficult questions.
 
 Sample Controller: StepbackPromptController.java
 Run this controller with the below curl commands:
-curl --location 'http://localhost:8080/openai-stepbackprompting'
+
+StepbackPrompt:
+curl --location --request GET 'http://localhost:8080/openai-stepbackprompting' \
+--header 'Content-Type: application/json' \
+--data '{
+    "prompt1":"Based on popular Horry Potter movie, what are 5 characters that contribute to a challenging and engaging level storyline in the movie?",
+    "prompt2": "Write a one paragraph storyline for the movie Harry Potter that is engaging. Context: {step-back}"
+}'
+
 
 
 7.9 Chain of Thought (CoT)
@@ -1902,8 +1959,21 @@ thinking process explicit and helps it arrive at more accurate conclusions.
 
 Sample Controller: ChainOfThoughtPromptController.java
 Run this controller with the below curl commands:
-curl --location 'http://localhost:8080/openai-cotzeroshotprompting'
-curl --location 'http://localhost:8080/openai-cotsinglefewshotprompting'
+
+COTZeroShotPrompt:
+curl --location --request GET 'http://localhost:8080/openai-cot-zeroshotprompting' \
+--header 'Content-Type: application/json' \
+--data '{
+    "myPrompt":"When I was 3 years old, my partner was 3 times my age. Now, I am 20 years old. How old is my partner?  Let'\''s think step by step."
+}'
+
+COTSingleFewShotPrompt:
+curl --location --request GET 'http://localhost:8080/openai-cot-singlefewshotprompting' \
+--header 'Content-Type: application/json' \
+--data '{
+    "myPrompt":"Q: When my brother was 2 years old, I was double his age. Now I am 40 years old. How old is my brother? Let'\''s think step by step. A: When my brother was 2 years, I was 2 * 2 = 4 years old. That'\''s an age difference of 2 years and I am older. Now I am 40 years old, so my brother is 40 - 2 = 38 years old. The answer is 38.  Q: When I was 3 years old, my partner was 3 times my age. Now, I am 20 years old. How old is my partner? Let'\''s think step    by step. A:"
+}'
+
 
 
 7.10 Self-Consistency
@@ -1918,7 +1988,15 @@ tasks. It's essentially an ensemble method for LLM outputs.
 
 Sample Controller: SelfConsistencyPromptController.java
 Run this controller with the below curl commands:
-curl --location 'http://localhost:8080/openai-selfconsistencyprompting'
+
+SelfConsistencyPrompt:
+curl --location 'http://localhost:8080/openai-selfconsistencyprompting' \
+--header 'Content-Type: application/json' \
+--data '{
+    "prompt": "Hi,\n I have seen you use Wordpress for your website. A great open source content management system. I have used it in the past too. It comes with lots of great user plugins. And it'\''s pretty easy to set up. \n  I did notice a bug in the contact form, which happens when you select the name field. See the attached screenshot of me entering text in the name field. Notice the JavaScript alert box that I invoked.\n But for the rest it'\''s a great website. I enjoy reading it. Feel free to leave the bug in the website, because it gives me more interesting things to read.\n Cheers, \n Harry the Hacker. ",
+    "context": "Email: {email} \n Classify the above email as IMPORTANT or NOT IMPORTANT. Let'\''s think step by step and explain why."
+}'
+
 
 
 7.11 Tree of Thoughts (ToT)
@@ -1933,7 +2011,17 @@ before finding the optimal path.
 
 Sample Controller: TreeOfThoughtPromptController.java
 Run this controller with the below curl commands:
-curl --location 'http://localhost:8080/openai-treeofthoughtprompting'
+
+TreeOfThoughtPrompt:
+curl --location --request GET 'http://localhost:8080/openai-treeofthoughtprompting' \
+--header 'Content-Type: application/json' \
+--data '{
+    "prompt" : "You are playing a game of chess. The board is in the starting position.\n Generate 3 different possible opening moves. For each move:\n 1. Describe the move in algebraic notation\n 2. Explain the strategic thinking behind this move\n 3. Rate the move'\''s strength from 1-10",
+    
+    "context1":"Analyze these opening moves and select the strongest one: {moves} \n\n Explain your reasoning step by step, considering: \n  1. Position control\n 2. Development potential \n  3. Long-term strategic advantage \n \n Then select the single best move.",
+    
+    "context2": "Based on this selected opening move:\n {best_move} \n \n Project the next 3 moves for both players. For each potential branch: \n  1. Describe the move and counter-move \n 2. Evaluate the resulting position\n 3. Identify the most promising continuation\n Finally, determine the most advantageous sequence of moves."
+}'
 
 
 7.12 Automatic Prompt Engineering
@@ -1943,11 +2031,21 @@ and benchmark different prompt variations to find optimal formulations for speci
 
 By systematically generating and evaluating prompt variations, 
 APE can find more effective prompts than manual engineering, 
-especially for complex tasks. It's a way of using AI to improve its own performance.
+especially for complex tasks. 
+
+It's a way of using AI to improve its own performance.
 
 Sample Controller: AutomaticPromptController.java
 Run this controller with the below curl commands:
-curl --location 'http://localhost:8080/openai-automaticprompting'
+
+AutomaticPrompt:
+curl --location --request GET 'http://localhost:8080/openai-automaticprompting' \
+--header 'Content-Type: application/json' \
+--data '{
+    "prompt" : "We have a band merchandise t-shirt webshop, and to train a chatbot we need various ways to order: \"One Metallica t-shirt size S\". Generate 10 variants, with the same semantics but keep the same meaning.",
+    
+    "context":" Please perform BLEU (Bilingual Evaluation Understudy) evaluation on the following variants: \n ---- \n {variants} \n  ---- \n\n  Select the instruction candidate with the highest evaluation score."
+}'
 
 
 7.13 Code prompting
@@ -1963,14 +2061,32 @@ Sample Controller: CodePromptController.java
 Run this controller with the below curl commands:
 
 # The below curl is used for code prompting
-curl --location 'http://localhost:8080/openai-codeprompting'
+CodePrompt:
+curl --location --request GET 'http://localhost:8080/openai-codeprompting' \
+--header 'Content-Type: application/json' \
+--data '{
+    "promptText" : "Write a code snippet in Bash, which asks for a folder name.\n Then it takes the contents of the folder and renames all the files inside by prepending the name draft to the file name."
+}'
 
 # The below curl is used for code prompting along with explaination
-curl --location 'http://localhost:8080/openai-explaincodeprompting'
+ExplainCodePrompt:
+curl --location --request GET 'http://localhost:8080/openai-explaincodeprompting' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "prompt" : "#!/bin/bash \n echo \"Enter the folder name: \" \n  read folder_name \n if [ ! -d \"$folder_name\" ]; then \n echo \"Folder does not exist.\" \n exit 1 \n fi \n files=( \"$folder_name\"/* ) \n for file in \"${files[@]}\"; do \n  new_file_name=\"draft_$(basename \"$file\")\" \n mv \"$file\"  \"$new_file_name\" \n done \n echo \"Files renamed successfully.\"", 
+    
+    "context":"Explain to me the below Bash code: \n ``` \n  {code} \n  ```"
+}'
 
 # The below curl is used for code in one programming lanuage to another programming language 
-curl --location 'http://localhost:8080/openai-translatecodeprompting'
-
+TranslateCodePrompt:
+curl --location --request GET 'http://localhost:8080/openai-explaincodeprompting' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "prompt" : "#!/bin/bash \n echo \"Enter the folder name: \" \n  read folder_name \n if [ ! -d \"$folder_name\" ]; then \n echo \"Folder does not exist.\" \n exit 1 \n fi \n files=( \"$folder_name\"/* ) \n for file in \"${files[@]}\"; do \n  new_file_name=\"draft_$(basename \"$file\")\" \n mv \"$file\"  \"$new_file_name\" \n done \n echo \"Files renamed successfully.\"", 
+    
+    "context":"Translate the below Bash code to a Python snippet: \n{code} "
+}'
 
 Reference: 
 https://spring.io/blog/2025/04/14/spring-ai-prompt-engineering-patterns
