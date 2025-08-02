@@ -1006,6 +1006,14 @@ If no chatId parameter is sent, the program generates a random UUID
 
 ## Vector Database - Similarity Search (ai-vector-db)
 ```xml 
+A vector database stores and manages data as numerical vectors, 
+allowing for efficient similarity searches, especially useful for AI 
+and machine learning applications. It enables finding items that are 
+similar to a given query based on their vector representations, 
+rather than relying on exact matches. This is particularly helpful 
+for handling unstructured data like text, images, and audio, 
+where understanding context and relationships is crucial. 
+
 1. Spring Initilizer
 Go to spring initilizer page https://start.spring.io/ 
 and add the following dependencies: 
@@ -1013,6 +1021,7 @@ Spring Web
 Spring JDBC
 OpenAI
 PGVector
+MongoDBAtlasVector
 DevTools and
 Docker Compose
 
@@ -1036,7 +1045,6 @@ Docker Compose
   <groupId>org.springframework.ai</groupId>
   <artifactId>spring-ai-starter-vector-store-pgvector</artifactId>
 </dependency>
-
 <dependency>
   <groupId>org.springframework.boot</groupId>
   <artifactId>spring-boot-devtools</artifactId>
@@ -1062,17 +1070,18 @@ Modifiy it to set db user, password and exposed port, in our case 5432
 services:
   pgvector:
     image: 'pgvector/pgvector:pg16'
+    container_name: 'vector-db'
     environment:
       - 'POSTGRES_DB=mydatabase'
       - 'POSTGRES_PASSWORD=secret'
       - 'POSTGRES_USER=myuser'
     labels:
-      - "org.springframework.boot.service-connection=postgres"
+      - 'org.springframework.boot.service-connection=postgres'
     ports:
       - '5432:5432'
 
 5. Go to command promt and run 
-docker compose up 
+docker compose -p vector-database up -d
 
 All the depenedencies for pgvector gets pulled 
 and the container starts running
@@ -1110,6 +1119,12 @@ and if the passenger is male or female.
 
 I have inserted only these 4 parameters from our original passenger table
 into the vector database but please note that the possibilies are limitless
+
+
+docker pull mongodb/mongodb-atlas-local:latest
+
+mongodb/mongodb-atlas-local
+
 
 ```
 
