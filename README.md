@@ -1114,14 +1114,27 @@ into the vector database but please note that the possibilies are limitless
 ```
 
 
-## Text to SQL - Static DDL  (ai-text2sql)
+## Text to SQL - (ai-text2sql)
 ```xml
 This convert the given metadata schema to an sql query based on 
 the database that is given as part of the prompt.
 
-The schema of the database table is give as part of the context 
+There are 3 different approaches that we can take based on our needs: 
+
+1. The schema of the database table is give as part of the context 
 and the database name is given as part of the user prompt 
-to generate the sql query
+to generate the sql query as output which can be copied and run on
+a database.
+(for this approach no need of any database connection and we can 
+run the result on a database table)
+
+2. The schema is read from a file storage and given as part of the context 
+and the query is given as a user prompt directly execute the query on a 
+connected database to output our result. 
+
+3. The schema is read dynamically from the connected database and added to 
+the context and the query is given as a user prompt directly execute 
+the query on a connected database to output our result. 
 
 
 1. Spring Initilizer
@@ -1130,8 +1143,9 @@ and add the following dependencies:
 Spring Web
 OpenAI
 DevTools
-Note: No database required here, as we give a static DDL statement to AI 
-which generates a query based on this. 
+Spring JDBC
+Postgres
+
 
 2. Create a project 'ai-text2sql' and download
 
@@ -1150,46 +1164,62 @@ which generates a query based on this.
   <scope>runtime</scope>
   <optional>true</optional>
 </dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-jdbc</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.postgresql</groupId>
+  <artifactId>postgresql</artifactId>
+  <scope>runtime</scope>
+</dependency>
 
 
-4. Add configuration in applications.properties file
+4. Install postgres using docker image and start the container. 
+docker pull postgres
+docker run --name text-to-sql -e POSTGRES_PASSWORD=secret -e POSTGRES_USER=myuser -e POSTGRES_DB=mydatabase -p 5432:5432 -d postgres
+
+5. The schema and data are stored in 
+schema.sql
+data.sql
+
+6. Add configuration in applications.properties file
 # needed for open ai access
 spring.ai.openai.api-key=${OPEN_AI_KEY}
 # set logging level for spring ai to debug  
 logging.level.org.springframework.ai=debug
+# this ensures that schema and data files are read and created while running the application
+spring.sql.init.mode=always
+# below 3 lines are database connection parameters
+spring.datasource.url=jdbc:postgresql://localhost:5432/mydatabase
+spring.datasource.username=myuser
+spring.datasource.password=secret
 
-5. Create Ruquest and Response objects
+7. Run the program once to make sure that schema and data are created in the database
+
+8. Approach 1: (SQL generation from user inputed schema - no database connection is needed)
+
+8.1. Create Request and Response objects
 Create 2 record objects 
-TextToSQLRequest and 
-TextToSQLResponse
+TextToSQLStaticRequest and 
+TextToSQLStaticResponse
 to warp up the request and response object 
 
-6. Add a controller file that accepts a message, 
+8.2. Add a controller file that accepts a message, 
 wraps a the incoming query with the user prompt template,
 which also contains the DDL based on which AI must return SQL response  
 and sends it to the ChatGPT engine to return the response. 
 
-Check the below part in the TextToSqlController.java controller file: 
-private static final String USER_PROMPT_TEMPLATE = """
-      You are a Postgres expert. Please generate SQL statements to answer user's query. 
-      
-      The table name is netflix_shows. Column names and data types are shown as below: 
-      show_id, text; type, text; title, text; director, text; cast_members, text; country, text; 
-      date_added, date; release_year, int4; rating, text; duration, text; 
-      listed_in, text; description, text.
-      
-      Output the SQL only. Don't use Markdown format and output the query in a single line.
-      
-      {user_input}
-      """;
-This is where we send DDL and the user_input to ChatGPT model that then generates the SQL.  
+Check the below part in the TextToSqlStaticController.java controller file: 
+This is where we send DDL as a context to AI and the userPrompt as a prompt 
+to ChatGPT model that then generates the SQL.  
 
-Check the textToSql method for details in the TextToSqlController.java file. 
+Check the textToSql method for details in the TextToSqlStaticController.java file. 
 
 11. Run the application 
 Run the application and excute a curl command to see the respone:
 
-TextToSQL(Sample1):
+TextToSQLStatic(Sample1):
 curl --location 'http://localhost:8080/texttosql' \
 --header 'Content-Type: application/json' \
 --data '{
@@ -1202,7 +1232,7 @@ This will result in a response containing the SQL query like below:
     "sql": "SELECT COUNT(*) FROM netflix_shows WHERE release_year = 2020;"
 }
 
-TextToSQL(Sample2):
+TextToSQLStatic(Sample2):
 curl --location 'http://localhost:8080/texttosql' \
 --header 'Content-Type: application/json' \
 --data '{
@@ -1216,105 +1246,43 @@ This will result in a response containing the SQL query like below:
 }
 
 
-Verify it with the netflix.sql file to check the correctness 
-(this could be inserted into a live database and checked for results)
-
-The command to do this would be:
-docker pull postgres
-docker run --name text-to-sql -e POSTGRES_PASSWORD=secret -e POSTGRES_USER=myuser -e POSTGRES_DB=mydatabase -p 5432:5432 -d postgres   
-docker exec -i <our running container name> psql -U myuser -d mydatabase < <path to our sql file>/netflix.sql
-
-Eg. 
-docker exec -i 50377aa11d70e787b49eadfe4929f3a541a7fccb2127bae3e88d78ec09571c2a psql -U myuser -d mydatabase < /Users/balaji/eclipse-workspace/spring-ai/ai-text2sql/netflix.sql
+Verify the output query by running it with on the netflix_shows table to check 
+the correctness.
 
 
-```
+9. Approach 2: SQL query will be generated from the schema which will be read 
+from a static file resouce and the output SQL query will be automatially run 
+on the database table to fetch the results.
 
-## Text To SQL - Dynamic DDL (ai-text2sql-dynamic)
-### (we have it stored in a file schema.sql which is fed to AI engine)
-```xml 
-1. Spring Initilizer
-Go to spring initilizer page https://start.spring.io/ 
-and add the following dependencies: 
-Spring Web
-Spring JDBC
-OpenAI
-DevTools and
-Postgres
-
-2. Create a project 'ai-text2sql-dynamic' and download
-
-3. The pom.xml will have the following dependencies: 
-<dependency>
-  <groupId>org.springframework.boot</groupId>
-  <artifactId>spring-boot-starter-jdbc</artifactId>
-</dependency>
-<dependency>
-  <groupId>org.springframework.boot</groupId>
-  <artifactId>spring-boot-starter-web</artifactId>
-</dependency>
-<dependency>
-  <groupId>org.springframework.ai</groupId>
-  <artifactId>spring-ai-starter-model-openai</artifactId>
-</dependency>
-<dependency>
-  <groupId>org.springframework.boot</groupId>
-  <artifactId>spring-boot-devtools</artifactId>
-  <scope>runtime</scope>
-  <optional>true</optional>
-</dependency>
-<dependency>
-  <groupId>org.postgresql</groupId>
-  <artifactId>postgresql</artifactId>
-  <scope>runtime</scope>
-</dependency>
-
-
-4. Install postgres using docker image and start the container. 
-docker pull postgres
-docker run --name ai-text2sql-dynamic -e POSTGRES_PASSWORD=secret -e POSTGRES_USER=myuser -e POSTGRES_DB=mydatabase -p 5432:5432 -d postgres
-
-5. The schema and data are stored in 
-schema.sql
-data.sql
-
-6. Add configuration in applications.properties file
-# needed for open ai access
-spring.ai.openai.api-key=${OPEN_AI_KEY}
-# this ensures that schema and data files are read and created while running the application
-spring.sql.init.mode=always
-# below 3 lines are database connection parameters
-spring.datasource.url=jdbc:postgresql://localhost:5432/mydatabase
-spring.datasource.username=myuser
-spring.datasource.password=secret
-
-7. Run the program once to make sure that schema and data are created in the database
-
-8. The below 3 files are used to warp Exceptions, Request, Response and a Custom Exception Handler. 
-AiException.java
-AiRequest.java
-AiResponse.java
+9.1. The below 4 files are used to warp Exceptions, Request, Response and a Custom Exceptions. 
+TextToSqllDynamicException.java
+TextToSqlDynamicRequest.java
+TextToSqlDynamicResponse.java
 CustomExceptionHandler.java
 
-9. Add a controller file that accepts a message, 
+9.2. Add a controller file that accepts a message, 
 wraps a the incoming query with the user prompt template stored in sql-prompt-template.st file,
-which also contains has the DDL attached with it based on which AI must return SQL response  
-and sends it to the ChatGPT engine to return the response. 
+which also contains the DDL attached with it based on which, our AI model must return SQL response  
+by sending it to the ChatGPT AI model engine to return the response that is wrapped in 
+TextToSqlDynamicResponse 
 
-Check the below part in the SqlController.java controller file 
+Check the below part in the TextToSqlDynamicController.java controller file 
 Check the two methods, sql & sql-dynamic method for details. 
 
 In the sql method we read a static ddl that is stored in the classpath 
-which we feed into the AI engine.
+which we feed into our AI model.
 
 In the sql-dynamic method we build our own ddl based on database and table
-metadata, then convert into into a json format which we feed into the AI engine.
+metadata, then convert into into a json format which we feed into the AI model.
 
-10. Run the application in 2 diffent way based on static & dynamic metadata fetching
-From static DDL statements: 
----------------------------
+9.3. Run the application in 2 diffent way based on static & dynamic metadata fetching
+
+9.3.1 From static DDL statements: 
+---------------------------------
 Run the application and excute a curl command to see the respone:
-curl --location 'http://localhost:8080/sql' \
+
+StaticSchemaReadFromFile:
+curl --location 'http://localhost:8080/sql-read-static-schema' \
 --header 'Content-Type: application/json' \
 --data '{
     "text": "Find the account with maximum balance."
@@ -1322,7 +1290,7 @@ curl --location 'http://localhost:8080/sql' \
 
 This will result in a response containing the SQL query and its response like below:
 {
-    "sqlQuery": "select * from TBL_ACCOUNT where balance = (select max(balance) from TBL_ACCOUNT);",
+    "sqlQuery": "SELECT * FROM TBL_ACCOUNT ORDER BY balance DESC LIMIT 1;",
     "results": [
         {
             "id": 6,
@@ -1335,25 +1303,24 @@ This will result in a response containing the SQL query and its response like be
 }
 Verify it with the database to check the correctness 
 
-From dynamic DDL statements: 
----------------------------
+9.3.2 From dynamic DDL statements: 
+----------------------------------
 Run the application and excute a curl command to see the respone:
-curl --location 'http://localhost:8080/sql-dynamic' \
+
+DynamicSchemaReadFromTableMetadata:
+curl --location 'http://localhost:8080/sql-read-dynamic-schema' \
 --header 'Content-Type: application/json' \
 --data '{
-    "text": "Find the account with maximum balance."
+    "text": "Find the user and account with maximum balance."
 }'
 
-This will result in a response containing the SQL query and its response like below:
 {
-    "sqlQuery": "select * from TBL_ACCOUNT where balance = (select max(balance) from TBL_ACCOUNT);",
+    "sqlQuery": "SELECT u.username, a.accountnumber, a.balance \nFROM tbl_account a \nJOIN tbl_user u ON a.user_id = u.id \nORDER BY a.balance DESC \nLIMIT 1;",
     "results": [
         {
-            "id": 6,
+            "username": "user4",
             "accountnumber": "ACC006",
-            "user_id": 4,
-            "balance": 3000.00,
-            "opendate": "2024-07-09"
+            "balance": 3000.00
         }
     ]
 }
