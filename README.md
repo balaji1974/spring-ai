@@ -725,6 +725,12 @@ In real senarios this can be streamed on to a browser directly and played using 
 
 ## OpenAI RAG - Retrieval Augmented Generation (ai-rag-textreader)
 ```xml
+RAG, or Retrieval-Augmented Generation, is an AI framework that enhances 
+large language models (LLMs) by combining their generative capabilities with an external 
+knowledge base. This approach allows LLMs to access and incorporate information beyond their training data, 
+leading to more accurate, relevant, and up-to-date responses, 
+especially in specific domains or for tasks requiring current information.
+
 # Retrieve: When you ask a question, the system first searches your specific knowledge base 
 (documents, databases, etc.) for information relevant to your query.
 
@@ -746,37 +752,71 @@ of exact matches, making it possible for a computer model to understand data con
 2. In the application.properties file add the following: 
 spring.ai.openai.api-key=<your api key>
 
-3. To generate an RAG response from prompt lets create a new service 
+3. To generate an RAG response from prompt lets create a new configuration  
 called RagConfiguration 
 
 @Configuration
 public class RagConfiguration {
-
 }
 
-4. Creat a method called simpleVectorStore which will 
-read a text file from a path containing the faq and convert 
-it back to a vector file. If the file already exist, then it 
-will not create the vector file again. 
+4. Creat a method called simpleVectorStore within this configuration  
+which will read a text file from a path containing the faq 
+and convert it back to a vector file (vectorstore.json)
+If the file already exist, then it will not create the 
+vector file again (just to avoid recreating the file everytime 
+server starts)
 
 
-5. Create a controller 'RagController' which will read the 
-message from the user and also read the Vector file, stuff everything 
-into a template, and create a Prompt before sending it to OpenAI 
-to get the output against the Vector content provided 
+5. Create a controller 'RagController' which will accept a  
+prompt from the user and also read the Vector file, stuff everything 
+into a prompt template, and create a Prompt from it, before sending 
+it to OpenAI to get the output against the content provided. 
 
+The template that we used for sending our prompt to our AI model is a below:
+You are a helpful assistant, conversing with a user about the subjects contained 
+in a set of documents. Use the information from the DOCUMENTS section to provide 
+accurate answers. If unsure or if the answer isn't found in the DOCUMENTS section, 
+simply state that you don't know the answer. Please format the answer in the form 
+of a Linkedin post. 
 
-6. Run the application. 
+QUESTION:
+{input}
 
-7. Run the following from command line or postman:
-curl --location 'http://localhost:8080/faq?message=how%20many%20sports%20%20does%20Olympics%20have'
+DOCUMENTS:
+{documents} 
 
+6. Run the application. First time when you run a vector store file 
+(vectorstore.json) will be created in the data folder. 
+
+7. Run the following from command line on postman:
+
+QueryTextKnowledgeBase01:
+curl --location --request GET 'http://localhost:8080/faq' \
+--header 'Content-Type: application/json' \
+--data '{
+    "message" : "Give me the total count of sports that Olympics 2024 have and please list them for me by grouping them by sports",
+    "similaritySize" : 2
+}'
+
+QueryTextKnowledgeBase02:
+curl --location --request GET 'http://localhost:8080/faq' \
+--header 'Content-Type: application/json' \
+--data '{
+    "message" : "What is the mascot of 2024 Olympics?",
+    "similaritySize" : 2
+}'
 
 ```
 
 
 ## Running a Machine Learning model locally - Ollama (ai-rag-ollama-pdfreader)
 ```xml 
+
+Running AI models locally offers several key benefits, primarily around privacy, security, 
+and control. Data stays on your device, reducing the risk of breaches and improving privacy. 
+You also gain control over how the model is used and customized, and you can operate offline 
+without needing a constant internet connection. 
+
 
 1. Download ollama and install it according to your OS version
 https://ollama.com/download
@@ -1014,6 +1054,10 @@ rather than relying on exact matches. This is particularly helpful
 for handling unstructured data like text, images, and audio, 
 where understanding context and relationships is crucial. 
 
+In this example we will see 2 such vector databases:
+PgVector 
+MongoDBAtlasVector 
+
 1. Spring Initilizer
 Go to spring initilizer page https://start.spring.io/ 
 and add the following dependencies: 
@@ -1046,6 +1090,10 @@ Docker Compose
   <artifactId>spring-ai-starter-vector-store-pgvector</artifactId>
 </dependency>
 <dependency>
+    <groupId>org.springframework.ai</groupId>
+    <artifactId>spring-ai-starter-vector-store-mongodb-atlas</artifactId>
+</dependency>
+<dependency>
   <groupId>org.springframework.boot</groupId>
   <artifactId>spring-boot-devtools</artifactId>
   <scope>runtime</scope>
@@ -1066,11 +1114,12 @@ Docker Compose
 
 
 4. Their is a docker compose.yaml file.
-Modifiy it to set db user, password and exposed port, in our case 5432
+Modifiy it to set db user, password and exposed port for 
+two service pgvector and mongodb
 services:
   pgvector:
     image: 'pgvector/pgvector:pg16'
-    container_name: 'vector-db'
+    container_name: 'pgvector-db'
     environment:
       - 'POSTGRES_DB=mydatabase'
       - 'POSTGRES_PASSWORD=secret'
@@ -1079,40 +1128,90 @@ services:
       - 'org.springframework.boot.service-connection=postgres'
     ports:
       - '5432:5432'
+   
+  mongodb:
+    image: 'mongodb/mongodb-atlas-local' # Or a specific version like mongo:6.0
+    container_name: 'mongoatlas-db'
+    ports:
+      - '27017:27017'
+    environment:
+      # Optional: set up authentication
+      - 'MONGO_INITDB_ROOT_USERNAME=myuser'
+      - 'MONGO_INITDB_ROOT_PASSWORD=secret'
+      - 'MONGO_INITDB_DATABASE: mydatabase' 
 
+   
 5. Go to command promt and run 
-docker compose -p vector-database up -d
+docker pull postgres
+docker pull mongodb/mongodb-atlas-local:latest
 
-All the depenedencies for pgvector gets pulled 
+docker compose up
+
+All the depenedencies for pgvector and mongodb gets pulled 
 and the container starts running
 
-6. Import the sql dump data that is needed for this project
-into the our database  
-docker exec -i <our running container name> psql -U myuser -d mydatabase < <path to our sql file>/titanic.sql
+6. The schema and data are stored in 
+schema.sql
+data.sql
 
-7. Login to our database and check if passenger table is created and check the record count.
-Check and verify if 1309 records are imported. 
-
-7. Read the data from 
-https://docs.spring.io/spring-ai/reference/1.0/api/etl-pipeline.html
-
-The VectorBuilder.java inside the config folder reads data from the our imported table 
-(only once if created) and imports the data into the vector_store table. 
-
-9. Add configuration in applications.properties file
-# To start the docker container for pgvector only once
-spring.docker.compose.lifecycle-management=start_only
+6. Add configuration in applications.properties file
 # needed for open ai access
 spring.ai.openai.api-key=${OPEN_AI_KEY}
-# needed for creating the schema automatically in pgvector store 
+
+spring.sql.init.mode=always
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/mydatabase
+spring.datasource.username=myuser
+spring.datasource.password=secret
+
+spring.docker.compose.lifecycle-management=start_only
 spring.ai.vectorstore.pgvector.initialize-schema=true
 
+spring.main.allow-bean-definition-overriding=true
 
-10. Modify the prompt and run the application
-In the VectorBuilder.java we have a variable called 
-PROMPT_STRING which can be modified to fetch query results. 
+spring.data.mongodb.uri=mongodb://myuser:secret@localhost:27017/admin
+spring.data.mongodb.database=mydatabase
+spring.ai.vectorstore.mongodb.collection-name=vector_store
+spring.ai.vectorstore.mongodb.initialize-schema=true
+spring.ai.vectorstore.mongodb.path-name=embedding
+spring.ai.vectorstore.mongodb.indexName=vector_index
 
-Note: to query we can get the passenger name, 
+7. Run the program once to make sure that schema and data are created in the database
+
+8. The VectorBuilder.java inside the config folder reads data from the our imported table 
+(only once if created) and imports the data into the vector_store table 
+(in both MongoDBAtlas Store and PgVector Store) 
+
+9. Run the application
+Run the application and excute a curl command to see the response:
+
+PgVector - SampleQuery01:
+curl --location --request GET 'http://localhost:8080/pg-similar-results' \
+--header 'Content-Type: application/json' \
+--data '{
+    "promptString" : "Male passenger who survived and final desitination was Newyork",
+    "fetchSize": 5
+}'
+
+PgVector - SampleQuery02:
+curl --location --request GET 'http://localhost:8080/pg-similar-results' \
+--header 'Content-Type: application/json' \
+--data '{
+    "promptString" : "Get female passengers with final destination as Michigan and survived",
+    "fetchSize": 10
+}'
+
+MongoVector - SampleQuery01:
+curl --location --request GET 'http://localhost:8080/mongo-similar-results' \
+--header 'Content-Type: application/json' \
+--data '{
+    "promptString" : "learn how to grow things",
+    "fetchSize": 2
+}'
+
+Note: 
+PgVector
+to query we can get the passenger name, 
 if the passenger died or alive, 
 the passenger final destination city, country 
 and if the passenger is male or female. 
@@ -1120,10 +1219,8 @@ and if the passenger is male or female.
 I have inserted only these 4 parameters from our original passenger table
 into the vector database but please note that the possibilies are limitless
 
-
-docker pull mongodb/mongodb-atlas-local:latest
-
-mongodb/mongodb-atlas-local
+MongoDBAtlasVector
+Static inserted data (3 records only) inside VectorStoreBuilder
 
 
 ```
@@ -1232,7 +1329,7 @@ to ChatGPT model that then generates the SQL.
 Check the textToSql method for details in the TextToSqlStaticController.java file. 
 
 11. Run the application 
-Run the application and excute a curl command to see the respone:
+Run the application and excute a curl command to see the response:
 
 TextToSQLStatic(Sample1):
 curl --location 'http://localhost:8080/texttosql' \
