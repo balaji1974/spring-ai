@@ -812,10 +812,11 @@ curl --location --request GET 'http://localhost:8080/faq' \
 ## Running a Machine Learning model locally - Ollama (ai-rag-ollama-pdfreader)
 ```xml 
 
-Running AI models locally offers several key benefits, primarily around privacy, security, 
-and control. Data stays on your device, reducing the risk of breaches and improving privacy. 
-You also gain control over how the model is used and customized, and you can operate offline 
-without needing a constant internet connection. 
+Running AI models locally offers several key benefits, primarily around privacy, 
+security, and control. Data stays on your device, reducing the risk of breaches 
+and improving privacy. You also gain control over how the model is used and 
+customized, and you can operate offline without needing a constant internet 
+connection. 
 
 
 1. Download ollama and install it according to your OS version
@@ -883,10 +884,19 @@ the respone into the ChatResponse object before returning it
 9. Run the application. 
 
 10. Run the following from command line or postman:
+
+QueryPDFKnowledgeBase01:
 curl --location 'http://localhost:8080/chat' \
 --header 'Content-Type: application/json' \
 --data '{
-    "query": "Who has the highest salary?"
+    "query": "Who has getting the highest salary?"
+}'
+
+QueryPDFKnowledgeBase02:
+curl --location 'http://localhost:8080/chat' \
+--header 'Content-Type: application/json' \
+--data '{
+    "query": "What was Ram born and what does he like to eat?"
 }'
 
 ```
@@ -960,6 +970,7 @@ Modifiy it as below to add pgadmin, adding db user and password
 services:
   pgvector:
     image: 'pgvector/pgvector:pg16'
+    container_name: 'pgvector'
     environment:
       - 'POSTGRES_DB=chat-engine-db'
       - 'POSTGRES_PASSWORD=secret'
@@ -970,6 +981,7 @@ services:
       - '5432:5432'
   pgadmin:
     image: dpage/pgadmin4
+    container_name: 'pgadmin'
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: adminpassword
@@ -1033,11 +1045,20 @@ in the ChatController.java file.
 
 11. Run the application 
 Run the application and excute a curl command to see the respone:
+
+QueryVectorDB01:
 curl --location 'http://localhost:8080/chat' \
 --header 'Content-Type: application/json' \
 --data '{
-    "chatId": "2216b193-d85f-4f86-b8cb-26a22bf05652",
-    "message": "Give me its revenue growth?"
+    "message": "How did NVidia perform in 2024?"
+}'
+
+QueryVectorDB02:
+curl --location 'http://localhost:8080/chat' \
+--header 'Content-Type: application/json' \
+--data '{
+    "chatId": "3c4b0791-8cb7-44e5-b8e7-503a10e33ead",
+    "message": "Which was their best quarter ?"
 }'
 
 If no chatId parameter is sent, the program generates a random UUID 
@@ -2387,6 +2408,51 @@ ollama list
 
 List of models supported by Ollama: 
 https://ollama.com/library
+
+
+Running AI models locally offers several key benefits, primarily around privacy, 
+security, and control. Data stays on your device, reducing the risk of breaches 
+and improving privacy. You also gain control over how the model is used and 
+customized, and you can operate offline without needing a constant internet 
+connection. 
+
+Benefits of running AI models locally: 
+--------------------------------------
+Enhanced Privacy and Security:
+Data processed locally remains on your device, minimizing exposure to potential 
+data breaches and unauthorized access, a critical advantage in sensitive 
+industries. 
+
+Cost Efficiency:
+After the initial setup, running models locally can be more cost-effective, 
+eliminating recurring cloud service fees, especially for businesses with 
+high data usage. 
+
+Offline Functionality:
+Locally hosted AI can operate without an internet connection, making it suitable 
+for remote locations, travel, or situations with unreliable connectivity. 
+
+Customization and Control:
+You have more flexibility to fine-tune models and tailor them to specific tasks 
+or datasets, without relying on the limitations or policies of cloud providers. 
+
+Improved Performance:
+Local AI can offer faster response times and reduced latency, particularly 
+beneficial for real-time applications. 
+
+Data Sovereignty:
+You maintain full control over your data, ensuring it stays within your 
+organization and meets regulatory requirements. 
+
+Reduced reliance on third-party services:
+Local AI reduces dependencies on cloud providers, enhancing resilience 
+and control. 
+
+References:
+Daniel Barczak, YouTube, July 28 2025
+https://www.youtube.com/watch?v=cbktGbxv43Y&t=789s
+MattVidProAI, YouTube, July 25 2025
+https://www.youtube.com/watch?v=qP1JtKW8714
 
 Now we’ll build a simple Mathematical equation solver using a Ollama model. 
 
