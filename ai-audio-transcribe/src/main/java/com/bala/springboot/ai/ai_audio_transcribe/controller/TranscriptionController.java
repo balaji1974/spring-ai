@@ -54,6 +54,4 @@ public class TranscriptionController {
         tempFile.delete();
         return new ResponseEntity<>(response.getResult().getOutput(), HttpStatus.OK);
     }
-    
-
 }

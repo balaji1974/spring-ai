@@ -6,6 +6,9 @@ import org.springframework.ai.openai.api.OpenAiAudioApi;
 import org.springframework.ai.openai.api.OpenAiAudioApi.TtsModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.bala.springboot.ai.ai_audio_text2speech.service.TextToSpeechService;
+import com.bala.springboot.ai.ai_audio_text2speech.service.TranslationService;
 
 import reactor.core.publisher.Flux;
 
@@ -32,6 +36,7 @@ import java.util.stream.Collectors;
 @RestController
 public class TextToSpeechController {
     private final TextToSpeechService textToSpeechService;
+    private final TranslationService translationService;
     
     @Value("${app.storage.path}")
     private String storagePath;
@@ -61,7 +66,8 @@ public class TextToSpeechController {
     
     
     @Autowired
-    public TextToSpeechController(TextToSpeechService textToSpeechService) {
+    public TextToSpeechController(TextToSpeechService textToSpeechService, TranslationService translationService) {
+    	this.translationService=translationService;
         this.textToSpeechService = textToSpeechService;
     }
 
@@ -73,7 +79,8 @@ public class TextToSpeechController {
     }
 
     @GetMapping("/text-to-speech")
-    public ResponseEntity<String> generateSpeechForText(@RequestParam("text") String text) {
+    public ResponseEntity<String> generateSpeechForText(@RequestParam("text") String text,
+    		@RequestParam("lang") String language) {
     	Optional<OpenAiAudioSpeechOptions> optionalSpeechOptions = Optional.empty();
     	return saveFile(text, optionalSpeechOptions);
     }
@@ -117,6 +124,30 @@ public class TextToSpeechController {
         return ResponseEntity.ok()
           .contentType(MediaType.APPLICATION_OCTET_STREAM)
           .body(responseBody);
+    }
+    
+    @GetMapping("/text-to-audio")
+    public ResponseEntity<Resource> convertTextToAudio(@RequestParam String text, 
+    		@RequestParam String lang) throws Exception {
+        // Create a TTS request
+    	String translatedText=translationService.translateToArabic(text, lang);
+    	
+    	OpenAiAudioSpeechOptions speechOptions = OpenAiAudioSpeechOptions.builder()
+    		    .model("tts-1")
+    		    .voice(OpenAiAudioApi.SpeechRequest.Voice.CORAL)
+    		    .responseFormat(OpenAiAudioApi.SpeechRequest.AudioResponseFormat.MP3)
+    		    .speed(1.0f)
+    		    .build();
+    	
+    	byte[] audioBytes=textToSpeechService.makeSpeech(translatedText,speechOptions);
+
+        // Create a resource from the byte array
+        ByteArrayResource resource = new ByteArrayResource(audioBytes);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM) // or "audio/mpeg"
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"speech.mp3\"")
+                .body(resource);
     }
     
     private ResponseEntity<String> saveFile(String text, Optional<OpenAiAudioSpeechOptions> optionalSpeechOptions) {
