@@ -180,3 +180,6 @@ README.html
 .DS_Store
 out/
 .micronaut/
+
+### This will be comitted as a seperate project
+/Users/balaji/eclipse-workspace/spring-ai/congimate
