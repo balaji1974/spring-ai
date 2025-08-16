@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.embedding.TokenCountBatchingStrategy;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.mongodb.atlas.MongoDBAtlasVectorStore;
@@ -100,13 +101,13 @@ public class VectorStoreBuilder {
     public VectorStore mongoVectorStore(MongoTemplate mongoTemplate, EmbeddingModel embeddingModel) {
         // You would configure MongoDBAtlasVectorStore with your specific collection and index details
         MongoDBAtlasVectorStore mvs= MongoDBAtlasVectorStore.builder(mongoTemplate, embeddingModel)
-                //.collectionName("vector_store")           // Optional: defaults to "vector_store"
-                //.vectorIndexName("vector_index")          // Optional: defaults to "vector_index"
-                //.pathName("embedding")                    // Optional: defaults to "embedding"
-                //.numCandidates(500)                             // Optional: defaults to 200
+                .collectionName("vector_store")           // Optional: defaults to "vector_store"
+                .vectorIndexName("vector_index")          // Optional: defaults to "vector_index"
+                .pathName("embedding")                    // Optional: defaults to "embedding"
+                .numCandidates(500)                             // Optional: defaults to 200
                 //.metadataFieldsToFilter(List.of("author", "year")) // Optional: defaults to empty list
-                //.initializeSchema(true)                         // Optional: defaults to false
-                //.batchingStrategy(new TokenCountBatchingStrategy()) // Optional: defaults to TokenCountBatchingStrategy
+                .initializeSchema(true)                         // Optional: defaults to false
+                .batchingStrategy(new TokenCountBatchingStrategy()) // Optional: defaults to TokenCountBatchingStrategy
                 .build();  
         
         long count=mongoTemplate.getCollection("vector_store").countDocuments();

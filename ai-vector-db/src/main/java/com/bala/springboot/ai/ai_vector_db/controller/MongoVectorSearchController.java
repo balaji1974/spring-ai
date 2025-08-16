@@ -31,6 +31,8 @@ public class MongoVectorSearchController {
 				.build()
 		);
 		
+		System.out.println(similarRecords);
+		
 		similarRecords.stream().forEach(s -> {
 			result.add(s.getText());
 		});

@@ -1586,7 +1586,7 @@ curl --location 'http://localhost:8080/weather-tools' \
 ## Chat Memory (a session managment alternative for AI models) - (ai-chat-memory)
 ```xml 
 
-Prerequisite:
+Prerequisite: (Manual creation)
 a. Docker desktop to be installed
 b. Pull command: docker pull postgres
 c. Run Command: docker run --name chat-memory -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d postgres
@@ -1595,6 +1595,12 @@ e. Create a user called 'myuser' with password 'secret'
 f. Create a database called 'mydatabase' and make user 'myuser' as the owner of this database
 g. When the server starts a table called ai_chat_memory will be created automatically under the 
 public schema if mydatabase automatically 
+
+
+(or)
+(Automatic creation)
+a. Pull command: docker pull postgres
+b. Run Command: docker run --name chat-memory -e POSTGRES_PASSWORD=secret -e POSTGRES_USER=myuser -e POSTGRES_DB=mydatabase -p 5432:5432 -d postgres
 
 
 1. Spring Initilizer
