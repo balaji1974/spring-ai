@@ -1243,7 +1243,6 @@ into the vector database but please note that the possibilies are limitless
 MongoDBAtlasVector
 Static inserted data (3 records only) inside VectorStoreBuilder
 
-
 ```
 
 
@@ -2547,6 +2546,16 @@ Ollama now supports all GGUF models from Hugging Face,
 allowing access to over 45,000 community-created models through Spring AI's 
 Ollama integration, runnable locally.
 
+GGUF: 
+Hugging Face Hub supports all file formats, but has built-in features for GGUF format, 
+a binary format that is optimized for quick loading and saving of models, 
+making it highly efficient for inference purposes. 
+GGUF is designed for use with GGML and other executors. 
+GGUF was developed by @ggerganov who is also the developer of llama.cpp, 
+a popular C/C++ LLM inference framework. 
+Models initially developed in frameworks like PyTorch can be converted to 
+GGUF format for use with those engines.
+
 In this tutorial, we’ll explore how to use Hugging Face models with Spring AI and Ollama. 
 We’ll build a simple chatbot using a chat completion model
 
@@ -2647,11 +2656,106 @@ https://dzone.com/articles/chat-with-your-knowledge-base-java-langchain4j-guide?
 Building Effective Agents with Spring AI
 https://spring.io/blog/2025/01/21/spring-ai-agentic-patterns
 
+GGUF:
+https://huggingface.co/docs/hub/en/gguf
+
 ```
 
+## Spring AI Open AI Moderation (ai-moderation-model)
+```xml
+We use Spring AI with OpenAI’s Moderation model to detect harmful or 
+sensitive content in text. The moderation model analyzes input and 
+flags categories like self-harm, violence, hate, or sexual content.
+
+In this tutorial, we’ll learn how to build a moderation service and 
+integrate it with the moderation model.
+
+Let’s review the moderation categories we can use:
+
+Hate, we can use this category to detect content that expresses or promotes hate based on protected traits.
+Hate/Threatening, we can use this category to detect hate content that includes threats of violence or serious harm.
+Harassment, we may face this category when language harasses, bullies, or targets an individual or group.
+Harassment/Threatening, we may face this category when harassment includes explicit threats or intent to cause harm.
+Self-harm, we can use this category to identify content that promotes or depicts self-harm behaviors.
+Self-harm/Intent, we can use this category when someone expresses an intent to self-harm.
+Self-harm/Instructions, we may face this category when content gives instructions, methods, or encouragement to self-harm.
+Sexual, we can use this category to flag explicit sexual content or promotion of sexual services.
+Sexual/Minors, we can use this category to flag any sexual content involving minors, which is strictly disallowed.
+Violence, we may face this category when content depicts or describes death, violence, or physical injury.
+Violence/Graphic, we can use this category to detect vivid or graphic depictions of injury, death, or severe harm.
+Illicit, we can use this category to flag advice, instructions, or promotion of illegal activities.
+Illicit/Violent, we may face this category when illicit content includes elements of violence.
 
 
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Open AI
+Spring Web
+DevTools 
 
+2. Create a project 'ai-moderation-model' and download
+
+3. The pom.xml will have the following dependencies: 
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-openai</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-devtools</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+
+4. Add configuration in applications.properties file
+# Application name
+spring.application.name=ai-moderation-model
+# Open AI Key
+spring.ai.openai.api-key=${OPENAI_API_KEY}
+# Open AI Moderation Model
+spring.ai.openai.moderation.options.model=omni-moderation-latest
+
+5. Create a service class called TextModerationService.java 
+to inject the OpenAI moderation model  
+and a moderate method that takes a text String as input and 
+results in a String as output
+
+6. Create a record classes as for DTO.
+ModerateRequest.java
+
+7. Create a controller called 
+TextModerationController.java 
+which is a RestController and we inject the 
+TextModerationService into this controller. 
+
+We also create a method called moderate that takes 
+ModerateRequest as input and sends a String as ResponseEntity 
+
+7. Finally run the application and test it: 
+curl --location 'http://localhost:8080/moderate' \
+--header 'Content-Type: application/json' \
+--data '{
+    "text": "Please review me"
+}'
+
+curl --location 'http://localhost:8080/moderate' \
+--header 'Content-Type: application/json' \
+--data '{
+    "text": "You'\''re really Bad Person! I don'\''t like you!"
+}'
+
+curl --location 'http://localhost:8080/moderate' \
+--header 'Content-Type: application/json' \
+--data '{
+    "text": "I hate you and I will hurt you!"
+}'
+
+```
 
 
 ### Reference
@@ -2682,5 +2786,7 @@ https://huggingface.co/models
 https://dzone.com/articles/chat-with-your-knowledge-base-java-langchain4j-guide?edition=598293
 https://www.baeldung.com/spring-ai-openai-tts
 https://www.baeldung.com/spring-ai-ollama-hugging-face-models
+
+https://www.baeldung.com/sping-ai-openai-moderation-model
 
 ```
