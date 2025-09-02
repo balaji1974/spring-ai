@@ -2757,6 +2757,102 @@ curl --location 'http://localhost:8080/moderate' \
 
 ```
 
+## Spring AI Google Vertex AI integration (ai-google-vertex)
+```xml
+In this tutorial, we’ll explore how we could integrate Spring AI with the 
+Google Cloud Vertex AI platform and adopt various models to provide chat and 
+embedding capabilities in our applications.
+
+Prerequisite: 
+1. As a first step, we must enable the Vertex AI API in our Google Cloud console 
+for making API calls to Vertex AI.
+2. Next, run the below command in your project root folder 
+to set the active project for all subsequent CLI commands:
+$ gcloud config set project <PROJECT-ID>
+3. Next, run the below command in your project root folder 
+to authenticate and give us an OAuth2 access token that grants 
+us access rights to the Vertex AI APIs:
+$ gcloud auth application-default login <YOUR-ACCOUNT>
+
+
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Google AI Gemini
+Google AI Embedding
+Spring Web
+DevTools 
+
+2. Create a project 'ai-google-vertex' and download
+
+3. The pom.xml will have the following dependencies: 
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-vertex-ai-embedding</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-vertex-ai-gemini</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-devtools</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+
+4. Add configuration in applications.properties file
+spring.application.name=ai-google-vertex
+
+spring.ai.vertex.ai.gemini.project-id=<Your Project Name>
+spring.ai.vertex.ai.gemini.location=<Your Region>
+spring.ai.vertex.ai.gemini.model=gemini-2.0-flash-lite
+
+spring.ai.vertex.ai.embedding.project-id=<Your Project Name>
+spring.ai.vertex.ai.embedding.location=<Your Region>
+spring.ai.vertex.ai.embedding.text.options.model=text-embedding-004
+
+
+5. Create 3 service classs:
+ChatService.java => Create a simple ChatService to accept a prompt as 
+the input argument
+TextEmbeddingService.java => Text embedding is the process of converting a 
+natural language text input into a high-dimensional vector representation. 
+The use case of embeddings could be performing similarity searches based on 
+the contextual meaning.
+MultiModalEmbeddingService.java => Vertex AI is capable of converting various 
+media, such as images, into embeddings and this service is used for that purpose.
+
+
+6. Create 3 different controllers for calling each of these services: 
+ChatController.java => which is a RestController for chat prompt use case 
+and we inject the ChatService into this controller. 
+TextEmbeddingController.java => which is a RestController for text embedding use case 
+and we inject the TextEmbeddingService into this controller. 
+MultiModalEmbeddingController.java => which is a RestController for image embedding 
+use case and we inject the MultiModalEmbeddingService into this controller. 
+
+
+7. Finally run the application and test it for the 3 different use cases: 
+curl --location 'http://localhost:8080/chat' \
+--header 'Content-Type: text/plain' \
+--data 'Tell me who you are? '
+
+
+curl --location 'http://localhost:8080/embedding/text' \
+--header 'Content-Type: text/plain' \
+--data 'Hello World !!!'
+
+
+curl --location 'http://localhost:8080/embedding/image' \
+--form 'image=@"<your project path>/ai-google-vertex/src/main/resources/test.jpg"'
+
+
+```
 
 ### Reference
 ```xml
@@ -2788,5 +2884,6 @@ https://www.baeldung.com/spring-ai-openai-tts
 https://www.baeldung.com/spring-ai-ollama-hugging-face-models
 
 https://www.baeldung.com/sping-ai-openai-moderation-model
+https://www.baeldung.com/spring-ai-google-cloud
 
 ```
