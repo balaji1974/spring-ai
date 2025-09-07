@@ -2853,6 +2853,17 @@ curl --location 'http://localhost:8080/embedding/image' \
 
 
 ```
+## Conclusion
+```xml
+Align responses to goals - Use System prompts
+No structured output - Use Output converters
+Not trained on your data - Use Prompt stuffing
+Limited context size - Use RAGs 
+Stateless APIs - Use Chat Memory
+Not aware of your APIs - Use Function calling
+Hallucinations - Use Evaluators (https://www.baeldung.com/spring-ai-testing-ai-evaluators)
+
+```
 
 ### Reference
 ```xml
