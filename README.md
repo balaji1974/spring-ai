@@ -2853,6 +2853,131 @@ curl --location 'http://localhost:8080/embedding/image' \
 
 
 ```
+
+## Spring AI Observability (ai-observability)
+```xml
+In this tutorial, we’ll explore how Spring AI works with Micrometer and 
+Zipkin to help you keep an eye on your AI model usage, costs, and 
+how data moves through your app.
+
+Prerequisite:
+Make sure docker is running
+
+1. Spring Initilizer
+Go to spring initilizer page https://start.spring.io/ 
+and add the following dependencies: 
+Spring Boot Starter (the core stuff)
+Spring Web (for building REST APIs)
+Spring AI OpenAI Module (for connecting to AI)
+Micrometer Tracing with Zipkin (for tracking requests)
+Spring Boot Actuator (for usage stats)
+Docker Compose Support (to run Zipkin locally)
+
+2. Create a project 'ai-observability' and download
+
+3. The pom.xml will have the following dependencies: 
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+  <groupId>io.micrometer</groupId>
+  <artifactId>micrometer-tracing-bridge-brave</artifactId>
+</dependency>
+<dependency>
+  <groupId>io.zipkin.reporter2</groupId>
+  <artifactId>zipkin-reporter-brave</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-starter-model-openai</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-docker-compose</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+<dependency>
+  <groupId>org.springframework.ai</groupId>
+  <artifactId>spring-ai-spring-boot-docker-compose</artifactId>
+  <scope>runtime</scope>
+  <optional>true</optional>
+</dependency>
+
+4. Add configuration in applications.properties file
+spring.application.name=ai-observability
+
+management.endpoints.web.exposure.include=*
+management.endpoint.health.show-details=always
+spring.threads.virtual.enabled=true
+spring.ai.openai.chat.options.model=gpt-4o
+
+spring.ai.openai.api-key=${OPEN_AI_KEY}
+
+spring.zipkin.base-url=http://localhost:9411/
+
+5. Add the following in your docker compose file compose.yaml:
+services:
+  zipkin:
+    image: 'openzipkin/zipkin:latest'
+    ports:
+      - '9411:9411'
+
+
+6. Add the ChatClient bean in your main class AiObservabilityApplication.java:
+@Bean
+public ChatClient chatClient(ChatClient.Builder builder) {
+    return builder.build();
+}
+
+7. Create a controller JokeController.java and add the following:
+@RestController
+public class JokeController {
+
+    private final ChatClient chatClient;
+
+    public JokeController(ChatClient chatClient) {
+        this.chatClient = chatClient;
+    }
+
+    @GetMapping("/joke")
+    public Map<String, String> getJoke() {
+        String joke = chatClient.prompt()
+                .user("Tell me a joke. Keep it short, just the joke.")
+                .call()
+                .content();
+        return Map.of("joke", joke);
+    }
+} 
+
+
+8. Finally run the application and test it: 
+curl --location 'http://localhost:8080/joke'
+
+Run it few times to check the following metrics:
+Check all available Metrics
+curl --location 'http://localhost:8080/actuator/metrics'
+
+Check how many times API is called:
+curl --location 'http://localhost:8080/actuator/metrics/gen_ai.client.operation'
+
+Check the AI token usage
+http://localhost:8080/actuator/metrics/gen_ai.client.token.usage
+
+9. Check Zipkin trace log at: (give it 1 or 2 minutes for trace to appear)
+http://localhost:9411/zipkin
+
+Reference:
+https://medium.com/@chpokhead/exploring-spring-ai-observability-6f8e7beb971c
+
+```
+
+
 ## Conclusion
 ```xml
 Align responses to goals - Use System prompts
@@ -2896,5 +3021,7 @@ https://www.baeldung.com/spring-ai-ollama-hugging-face-models
 
 https://www.baeldung.com/sping-ai-openai-moderation-model
 https://www.baeldung.com/spring-ai-google-cloud
+
+https://medium.com/@chpokhead/exploring-spring-ai-observability-6f8e7beb971c
 
 ```
